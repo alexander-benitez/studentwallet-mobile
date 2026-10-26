@@ -1,0 +1,181 @@
+.movements-content {
+  --background: #080d1a;
+  color: #ffffff;
+}
+
+.movements-wrapper {
+  padding: 32px 18px 90px 18px;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+.page-title {
+  font-size: 2.1rem;
+  font-weight: 800;
+  margin: 0 0 20px 0;
+  color: #ffffff;
+}
+
+/* Filtros tipo Pastilla */
+.pill-filters {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+
+  .pill-btn {
+    background: #111726;
+    border: 1px solid #1a2235;
+    color: #94a3b8;
+    padding: 8px 22px;
+    border-radius: 24px;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &.active {
+      background: #1d4ed8;
+      border-color: #2563eb;
+      color: #ffffff;
+    }
+  }
+}
+
+/* Desplegables de Categoría y Fecha */
+.dropdown-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+
+  .dropdown-box {
+    flex: 1;
+    position: relative;
+    background: #111726;
+    border: 1px solid #1a2235;
+    border-radius: 12px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+
+    select {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #ffffff;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 0 36px 0 16px;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+
+      option {
+        background: #111726;
+        color: #ffffff;
+        font-weight: 500;
+      }
+    }
+
+    .select-arrow {
+      position: absolute;
+      right: 14px;
+      pointer-events: none;
+      color: #ffffff;
+      font-size: 1.1rem;
+    }
+  }
+}
+
+/* Lista de tarjetas */
+.movements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  .movement-card {
+    background: #111726;
+    border: 1px solid #1a2235;
+    border-radius: 16px;
+    padding: 14px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .card-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+
+      .icon-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        ion-icon {
+          font-size: 1.4rem;
+          color: #ffffff;
+        }
+      }
+
+      .card-texts {
+        display: flex;
+        flex-direction: column;
+
+        .category-name {
+          font-weight: 700;
+          font-size: 1rem;
+          color: #ffffff;
+          margin-bottom: 3px;
+        }
+
+        .date-note {
+          font-size: 0.82rem;
+          color: #94a3b8;
+        }
+      }
+    }
+
+    .card-right {
+      .amount {
+        font-weight: 800;
+        font-size: 1.05rem;
+
+        &.expense {
+          color: #ef4444;
+        }
+
+        &.income {
+          color: #10b981;
+        }
+      }
+    }
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 40px 16px;
+    color: #64748b;
+    font-size: 0.95rem;
+  }
+}
+
+/* Botón flotante (+) */
+.fab-plus {
+  margin-bottom: 60px;
+  margin-inline-end: 12px;
+
+  ion-fab-button {
+    --background: #8b5cf6;
+    --color: #ffffff;
+    --box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+    width: 52px;
+    height: 52px;
+  }
+}

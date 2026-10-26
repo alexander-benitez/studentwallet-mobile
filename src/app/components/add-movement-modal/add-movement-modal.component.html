@@ -1,0 +1,81 @@
+<div class="modal-wrapper">
+  <!-- Selector Tipo: Ingreso / Gasto -->
+  <div class="type-switch">
+    <button 
+      type="button" 
+      class="switch-btn" 
+      [class.active]="type === 'ingreso'" 
+      (click)="setType('ingreso')">
+      Ingreso
+    </button>
+    <button 
+      type="button" 
+      class="switch-btn" 
+      [class.active]="type === 'gasto'" 
+      (click)="setType('gasto')">
+      Gasto
+    </button>
+  </div>
+
+  <!-- Monto Centrado Gigante -->
+  <div class="amount-container">
+    <input 
+      type="number" 
+      [(ngModel)]="amount" 
+      class="amount-input" 
+      placeholder="0"
+      min="0"
+    />
+  </div>
+
+  <!-- Categorías (Chips) -->
+  <div class="section-group">
+    <label class="section-label">Categoría</label>
+    <div class="chips-container">
+      <button 
+        type="button"
+        class="chip-item" 
+        *ngFor="let cat of currentCategories" 
+        [class.selected]="selectedCategory === cat.name" 
+        (click)="selectCategory(cat.name)">
+        <span class="chip-emoji">{{ cat.icon }}</span>
+        <span>{{ cat.name }}</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Fecha -->
+  <div class="section-group">
+    <label class="section-label">Fecha</label>
+    <div class="input-card">
+      <input type="date" [(ngModel)]="date" class="date-input" />
+    </div>
+  </div>
+
+  <!-- Descripción -->
+  <div class="section-group">
+    <label class="section-label">Descripción</label>
+    <div class="input-card">
+      <input 
+        type="text" 
+        [(ngModel)]="description" 
+        placeholder="Opcional" 
+        class="text-input" 
+      />
+    </div>
+  </div>
+
+  <!-- Botón Guardar -->
+  <button 
+    type="button" 
+    class="btn-save" 
+    [class.btn-income]="type === 'ingreso'" 
+    (click)="save()">
+    {{ type === 'gasto' ? 'Guardar gasto' : 'Guardar ingreso' }}
+  </button>
+
+  <!-- Botón Cancelar -->
+  <button type="button" class="btn-cancel" (click)="cancel()">
+    Cancelar
+  </button>
+</div>

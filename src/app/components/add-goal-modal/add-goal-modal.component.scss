@@ -1,0 +1,79 @@
+:host {
+  display: block;
+  background: #0d1527;
+  color: #ffffff;
+}
+
+.modal-wrapper {
+  background: #0d1527;
+  padding: 24px 20px 36px 20px;
+  display: flex;
+  flex-direction: column;
+
+  .modal-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin: 0 0 20px 0;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+
+    label {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 8px;
+    }
+
+    .input-card {
+      background: #151e33;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 0 16px;
+      height: 52px;
+      display: flex;
+      align-items: center;
+
+      input {
+        width: 100%;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        font-size: 1rem;
+
+        &::placeholder {
+          color: #475569;
+        }
+      }
+    }
+  }
+
+  .btn-create {
+    width: 100%;
+    background: #2b66f6;
+    color: #ffffff;
+    border: none;
+    border-radius: 14px;
+    height: 52px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 12px;
+  }
+
+  .btn-cancel {
+    width: 100%;
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    height: 44px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 8px;
+  }
+}

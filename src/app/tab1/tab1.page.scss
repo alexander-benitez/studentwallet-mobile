@@ -1,0 +1,414 @@
+.dashboard-content {
+  --background: #080d1a;
+  color: #ffffff;
+}
+
+.dashboard-wrapper {
+  padding: 28px 18px 90px 18px;
+  display: flex;
+  flex-direction: column;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* Saludo inicial */
+.header-greeting {
+  margin-bottom: 20px;
+
+  h1 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    color: #ffffff;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    margin: 0;
+  }
+}
+
+/* Tarjeta de Saldo */
+.balance-card {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #4338ca 100%);
+  border-radius: 24px;
+  padding: 24px 20px;
+  margin-bottom: 16px;
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+
+  .label-muted {
+    font-size: 0.88rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+  }
+
+  .balance-amount {
+    font-size: 2.6rem;
+    font-weight: 800;
+    margin: 8px 0 20px 0;
+    letter-spacing: -0.5px;
+  }
+
+  .balance-subcards {
+    display: flex;
+    gap: 12px;
+
+    .subcard {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(8px);
+      border-radius: 14px;
+      padding: 10px 14px;
+      display: flex;
+      flex-direction: column;
+
+      .subcard-title {
+        font-size: 0.78rem;
+        color: rgba(255, 255, 255, 0.85);
+        margin-bottom: 4px;
+      }
+
+      .subcard-val {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+/* Fila de Métricas */
+.metrics-row {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+
+  .metric-card {
+    flex: 1;
+    background: #111726;
+    border: 1px solid #1a2235;
+    border-radius: 16px;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+
+    .metric-title {
+      font-size: 0.78rem;
+      color: #94a3b8;
+      margin-bottom: 6px;
+    }
+
+    .metric-amount {
+      font-size: 1.05rem;
+      font-weight: 800;
+
+      &.green {
+        color: #10b981;
+      }
+
+      &.red {
+        color: #ef4444;
+      }
+    }
+  }
+}
+
+/* Acciones Rápidas */
+.quick-actions {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+
+  .action-btn {
+    flex: 1;
+    background: #111726;
+    border: 1px solid #1a2235;
+    border-radius: 16px;
+    padding: 14px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: #ffffff;
+    cursor: pointer;
+    transition: background 0.2s;
+
+    ion-icon {
+      font-size: 1.5rem;
+
+      &.target-icon {
+        color: #ef4444;
+      }
+    }
+
+    span {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    &:active {
+      background: #1a2235;
+    }
+  }
+}
+
+/* Títulos y Cabeceras de Secciones */
+.section-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+
+  .see-all-link {
+    font-size: 0.85rem;
+    color: #3b82f6;
+    text-decoration: none;
+    font-weight: 600;
+  }
+}
+
+/* Tarjeta Presupuesto */
+.budget-section {
+  margin-bottom: 24px;
+
+  .section-title {
+    margin-bottom: 12px;
+  }
+
+  .budget-card {
+    background: #111726;
+    border: 1px solid #1a2235;
+    border-radius: 18px;
+    padding: 16px;
+
+    .budget-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      .title {
+        font-size: 0.9rem;
+        color: #94a3b8;
+      }
+
+      .ratio {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #ffffff;
+      }
+    }
+
+    .budget-progress {
+      --background: #1e293b;
+      --progress-background: #10b981;
+      height: 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+
+    .percent-label {
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+  }
+}
+
+/* Tarjetas de Movimientos */
+.movements-section {
+  margin-bottom: 24px;
+
+  .movements-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .movement-card {
+      background: #111726;
+      border: 1px solid #1a2235;
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .card-left {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+
+        .icon-avatar {
+          width: 44px;
+          height: 44px;
+          min-width: 44px;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          ion-icon {
+            font-size: 1.4rem;
+            color: #ffffff;
+          }
+        }
+
+        .card-texts {
+          display: flex;
+          flex-direction: column;
+
+          .category-name {
+            font-weight: 700;
+            font-size: 0.98rem;
+            color: #ffffff;
+            margin-bottom: 3px;
+          }
+
+          .date-note {
+            font-size: 0.8rem;
+            color: #94a3b8;
+          }
+        }
+      }
+
+      .card-right {
+        .amount {
+          font-weight: 800;
+          font-size: 1.05rem;
+
+          &.expense {
+            color: #ef4444;
+          }
+
+          &.income {
+            color: #10b981;
+          }
+        }
+      }
+    }
+  }
+}
+
+/* Tarjeta Mis Metas */
+.goals-section {
+  margin-bottom: 16px;
+
+  .goal-card {
+    background: #111726;
+    border: 1px solid #1a2235;
+    border-radius: 18px;
+    padding: 16px;
+
+    .goal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+
+      .goal-title-wrap {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+
+        .goal-icon {
+          font-size: 1.1rem;
+        }
+
+        .goal-name {
+          font-weight: 700;
+          font-size: 0.95rem;
+          color: #ffffff;
+        }
+      }
+
+      .goal-percent {
+        color: #10b981;
+        font-weight: 800;
+        font-size: 0.95rem;
+      }
+    }
+
+    .goal-progress {
+      --background: #1e293b;
+      --progress-background: #10b981;
+      height: 8px;
+      border-radius: 4px;
+      margin-bottom: 12px;
+    }
+
+    .goal-footer {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      font-weight: 600;
+
+      .saved-amount {
+        color: #94a3b8;
+      }
+
+      .remaining-amount {
+        color: #94a3b8;
+      }
+    }
+  }
+}
+
+/* Tarjeta Consejos para ti */
+.tips-card {
+  background: #111726;
+  border: 1px solid #1a2235;
+  border-radius: 18px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+
+  .tip-icon-box {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    background: #ffffff;
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+  }
+
+  .tip-texts {
+    h4 {
+      margin: 0 0 3px 0;
+      font-size: 0.98rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    p {
+      margin: 0;
+      font-size: 0.82rem;
+      color: #94a3b8;
+    }
+  }
+}
+
+/* Botón flotante (+) */
+.fab-plus {
+  margin-bottom: 60px;
+  margin-inline-end: 12px;
+
+  ion-fab-button {
+    --background: #8b5cf6;
+    --color: #ffffff;
+    --box-shadow: 0 4px 14px rgba(139, 92, 246, 0.4);
+    width: 52px;
+    height: 52px;
+  }
+}

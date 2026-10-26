@@ -1,0 +1,74 @@
+<ion-header class="ion-no-border auth-header-bar">
+  <ion-toolbar class="auth-toolbar">
+    <a routerLink="/welcome" class="back-link">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+      <span>Volver</span>
+    </a>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="auth-page">
+  <div class="login-container">
+    <!-- Título y subtítulo -->
+    <div class="auth-header">
+      <h2>Inicia sesión</h2>
+      <p>Qué bueno verte de nuevo.</p>
+    </div>
+
+    <!-- Formulario -->
+    <form (ngSubmit)="onLogin()">
+      <!-- Campo Correo -->
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <div class="input-container">
+          <input 
+            type="email" 
+            [(ngModel)]="email" 
+            name="email" 
+            placeholder="tu@correo.com" 
+            required 
+          />
+        </div>
+      </div>
+
+      <!-- Campo Contraseña -->
+      <div class="form-group">
+        <label>Contraseña</label>
+        <div class="input-container">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            [(ngModel)]="password" 
+            name="password" 
+            placeholder="Mínimo 6 caracteres" 
+            required 
+          />
+          <button 
+            type="button" 
+            class="eye-btn" 
+            (click)="togglePasswordVisibility()">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+        <div class="forgot-wrapper">
+          <a class="forgot-link">¿Olvidaste tu contraseña?</a>
+        </div>
+      </div>
+
+      <!-- Botón Iniciar Sesión -->
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        class="btn-submit" 
+        [disabled]="isLoading">
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">Iniciar sesión</span>
+      </ion-button>
+    </form>
+
+    <!-- Enlace inferior -->
+    <div class="footer-link">
+      <span>¿No tienes cuenta? </span>
+      <a routerLink="/register">Crear una cuenta</a>
+    </div>
+  </div>
+</ion-content>

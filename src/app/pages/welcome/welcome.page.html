@@ -1,0 +1,37 @@
+<ion-content class="welcome-content" [fullscreen]="true">
+  <div class="welcome-container">
+    <!-- Header: Logo y Nombre -->
+    <div class="brand-header">
+      <div class="logo-box">
+        <ion-icon name="card-outline"></ion-icon>
+      </div>
+      <span class="brand-title">StudentWallet</span>
+    </div>
+
+    <!-- Área de ilustración central -->
+    <div class="hero-area">
+      <div class="chart-mock">
+        <div class="bar bar-1"></div>
+        <div class="bar bar-2"></div>
+        <div class="bar bar-3"></div>
+        <div class="bar bar-4">
+          <div class="coin-badge">$</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Textos y botones inferiores -->
+    <div class="action-footer">
+      <h1>Toma el control de tu dinero.</h1>
+      <p>Organiza tus gastos, alcanza tus metas y mejora tus finanzas.</p>
+
+      <ion-button expand="block" class="btn-login" routerLink="/login">
+        Iniciar sesión
+      </ion-button>
+
+      <ion-button expand="block" fill="clear" class="btn-register" routerLink="/register">
+        Crear cuenta
+      </ion-button>
+    </div>
+  </div>
+</ion-content>  

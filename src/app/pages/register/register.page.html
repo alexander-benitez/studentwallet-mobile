@@ -1,0 +1,97 @@
+<ion-header class="ion-no-border auth-header-bar">
+  <ion-toolbar class="auth-toolbar">
+    <a routerLink="/welcome" class="back-link">
+      <ion-icon name="chevron-back-outline"></ion-icon>
+      <span>Volver</span>
+    </a>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="auth-page">
+  <div class="register-container">
+    <div class="auth-header">
+      <h2>Crea tu cuenta</h2>
+      <p>Empieza en menos de un minuto.</p>
+    </div>
+
+    <form (ngSubmit)="onRegister()">
+      <!-- Nombre -->
+      <div class="form-group">
+        <label>Nombre</label>
+        <div class="input-container">
+          <input 
+            type="text" 
+            [(ngModel)]="name" 
+            name="name" 
+            placeholder="Tu nombre" 
+            required 
+          />
+        </div>
+      </div>
+
+      <!-- Correo electrónico -->
+      <div class="form-group">
+        <label>Correo electrónico</label>
+        <div class="input-container">
+          <input 
+            type="email" 
+            [(ngModel)]="email" 
+            name="email" 
+            placeholder="tu@correo.com" 
+            required 
+          />
+        </div>
+      </div>
+
+      <!-- Contraseña -->
+      <div class="form-group">
+        <label>Contraseña</label>
+        <div class="input-container">
+          <input 
+            [type]="showPassword ? 'text' : 'password'" 
+            [(ngModel)]="password" 
+            name="password" 
+            placeholder="Mínimo 6 caracteres" 
+            required 
+          />
+          <button 
+            type="button" 
+            class="eye-btn" 
+            (click)="togglePassword()">
+            <ion-icon [name]="showPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Confirmar contraseña -->
+      <div class="form-group">
+        <label>Confirmar contraseña</label>
+        <div class="input-container">
+          <input 
+            [type]="showConfirmPassword ? 'text' : 'password'" 
+            [(ngModel)]="confirmPassword" 
+            name="confirmPassword" 
+            placeholder="Mínimo 6 caracteres" 
+            required 
+          />
+          <button 
+            type="button" 
+            class="eye-btn" 
+            (click)="toggleConfirmPassword()">
+            <ion-icon [name]="showConfirmPassword ? 'eye-off-outline' : 'eye-outline'"></ion-icon>
+          </button>
+        </div>
+      </div>
+
+      <!-- Botón Crear cuenta -->
+      <ion-button 
+        expand="block" 
+        type="submit" 
+        class="btn-submit" 
+        [disabled]="isLoading">
+        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
+        <span *ngIf="!isLoading">Crear cuenta</span>
+      </ion-button>
+    </form>
+  </div>
+</ion-content>

@@ -1,0 +1,46 @@
+<div class="modal-wrapper">
+  <!-- Título con emoji -->
+  <h2 class="modal-title">Nueva meta 🎯</h2>
+
+  <form (ngSubmit)="createGoal()">
+    <!-- Campo Nombre -->
+    <div class="form-group">
+      <label>Nombre</label>
+      <div class="input-card">
+        <input 
+          type="text" 
+          [(ngModel)]="goalName" 
+          name="goalName" 
+          placeholder="Ej. Comprar una laptop" 
+          required 
+        />
+      </div>
+    </div>
+
+    <!-- Campo Monto a ahorrar -->
+    <div class="form-group">
+      <label>Monto a ahorrar</label>
+      <div class="input-card">
+        <input 
+          type="number" 
+          [(ngModel)]="targetAmount" 
+          name="targetAmount" 
+          placeholder="$0.00" 
+          min="1" 
+          step="any" 
+          required 
+        />
+      </div>
+    </div>
+
+    <!-- Botón Crear meta -->
+    <button type="submit" class="btn-create">
+      Crear meta
+    </button>
+
+    <!-- Botón Cancelar -->
+    <button type="button" class="btn-cancel" (click)="cancel()">
+      Cancelar
+    </button>
+  </form>
+</div>

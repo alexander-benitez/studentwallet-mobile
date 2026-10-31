@@ -16,151 +16,108 @@ export interface Movement {
   providedIn: 'root'
 })
 export class TransactionService {
-  private readonly STORAGE_KEY_MOVEMENTS = 'studentwallet_movements';
-  private readonly STORAGE_KEY_BALANCE = 'studentwallet_balance';
+  private readonly API_BASE = 'http://127.0.0.1:8000/api';
 
-  // Datos base que aparecen la primera vez que se abre la app
-  private defaultMovements: Movement[] = [
-    {
-      id: 1,
-      category: 'Alimentación',
-      subtitle: 'Hoy · Almuerzo',
-      amount: -8.50,
-      isExpense: true,
-      icon: 'fast-food-outline',
-      iconBg: '#2a2216',
-      period: 'week'
-    },
-    {
-      id: 2,
-      category: 'Beca',
-      subtitle: 'Ayer · Beca mensual',
-      amount: 250.00,
-      isExpense: false,
-      icon: 'cash-outline',
-      iconBg: '#133023',
-      period: 'week'
-    },
-    {
-      id: 3,
-      category: 'Transporte',
-      subtitle: '02 oct · Bus',
-      amount: -3.00,
-      isExpense: true,
-      icon: 'bus-outline',
-      iconBg: '#162b3a',
-      period: 'week'
-    },
-    {
-      id: 4,
-      category: 'Mesada',
-      subtitle: '01 oct · Mesada',
-      amount: 950.00,
-      isExpense: false,
-      icon: 'wallet-outline',
-      iconBg: '#2d1b22',
-      period: 'month'
-    },
-    {
-      id: 5,
-      category: 'Alimentación',
-      subtitle: '01 oct · Comidas del mes',
-      amount: -126.50,
-      isExpense: true,
-      icon: 'fast-food-outline',
-      iconBg: '#2a2216',
-      period: 'month'
-    },
-    {
-      id: 6,
-      category: 'Transporte',
-      subtitle: '01 oct · Pasajes',
-      amount: -57.00,
-      isExpense: true,
-      icon: 'bus-outline',
-      iconBg: '#162b3a',
-      period: 'month'
-    },
-    {
-      id: 7,
-      category: 'Estudios',
-      subtitle: '30 sept · Libros y copias',
-      amount: -55.00,
-      isExpense: true,
-      icon: 'book-outline',
-      iconBg: '#1b2a24',
-      period: 'month'
-    },
-    {
-      id: 8,
-      category: 'Entretenimiento',
-      subtitle: '29 sept · Cine y salidas',
-      amount: -45.00,
-      isExpense: true,
-      icon: 'game-controller-outline',
-      iconBg: '#211d2d',
-      period: 'month'
-    },
-    {
-      id: 9,
-      category: 'Otros',
-      subtitle: '28 sept · Varios',
-      amount: -25.00,
-      isExpense: true,
-      icon: 'home-outline',
-      iconBg: '#2b2123',
-      period: 'month'
-    }
-  ];
-
-  private movementsSubject = new BehaviorSubject<Movement[]>(this.loadMovements());
+  private movementsSubject = new BehaviorSubject<Movement[]>([]);
   movements$ = this.movementsSubject.asObservable();
 
-  private balanceSubject = new BehaviorSubject<number>(this.loadBalance());
+  private balanceSubject = new BehaviorSubject<number>(0);
   balance$ = this.balanceSubject.asObservable();
 
-  constructor() {}
+  constructor() {
+    this.refreshData();
+  }
 
-  private loadMovements(): Movement[] {
-    const data = localStorage.getItem(this.STORAGE_KEY_MOVEMENTS);
-    if (data) {
-      try {
-        return JSON.parse(data);
-      } catch (e) {
-        console.error('Error al cargar movimientos:', e);
+  private getHeaders(): HeadersInit {
+    const token = localStorage.getItem('auth_token') || '';
+    return {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    };
+  }
+
+  async refreshData() {
+    await Promise.all([
+      this.loadBalanceFromApi(),
+      this.loadMovementsFromApi()
+    ]);
+  }
+
+  async loadBalanceFromApi(): Promise<number> {
+    try {
+      const res = await fetch(`${this.API_BASE}/balance`, {
+        headers: this.getHeaders()
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const saldo = Number(json.data?.saldo_total ?? json.saldo_total ?? 0);
+        this.balanceSubject.next(saldo);
+        return saldo;
       }
+    } catch (err) {
+      console.error('Error al consultar balance:', err);
     }
-    this.saveMovements(this.defaultMovements);
-    return this.defaultMovements;
+    return this.balanceSubject.value;
   }
 
-  private loadBalance(): number {
-    const val = localStorage.getItem(this.STORAGE_KEY_BALANCE);
-    if (val !== null) {
-      return parseFloat(val);
+  async loadMovementsFromApi(): Promise<Movement[]> {
+    try {
+      const res = await fetch(`${this.API_BASE}/transactions`, {
+        headers: this.getHeaders()
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const rawList = json.data || json || [];
+
+        const mapped: Movement[] = rawList.map((item: any) => {
+          const isExpense = item.type === 'gasto' || item.type === 'expense' || Number(item.amount) < 0;
+          const absAmount = Math.abs(Number(item.amount));
+          const categoryName = item.category?.name || item.category || 'General';
+
+          return {
+            id: item.id,
+            category: categoryName,
+            subtitle: item.description || item.descripcion || 'Movimiento',
+            amount: isExpense ? -absAmount : absAmount,
+            isExpense: isExpense,
+            icon: isExpense ? 'cart-outline' : 'cash-outline',
+            iconBg: isExpense ? '#2a2216' : '#133023',
+            period: 'week'
+          };
+        });
+
+        this.movementsSubject.next(mapped);
+        return mapped;
+      }
+    } catch (err) {
+      console.error('Error al obtener movimientos:', err);
     }
-    const initial = 880.00;
-    localStorage.setItem(this.STORAGE_KEY_BALANCE, initial.toString());
-    return initial;
+    return [];
   }
 
-  private saveMovements(movements: Movement[]) {
-    localStorage.setItem(this.STORAGE_KEY_MOVEMENTS, JSON.stringify(movements));
-  }
+  async addMovement(item: Movement): Promise<boolean> {
+    try {
+      const body = {
+        amount: Math.abs(item.amount),
+        type: item.isExpense ? 'gasto' : 'ingreso',
+        description: item.subtitle || item.category,
+        category: item.category
+      };
 
-  private saveBalance(balance: number) {
-    localStorage.setItem(this.STORAGE_KEY_BALANCE, balance.toString());
-  }
+      const res = await fetch(`${this.API_BASE}/transactions`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(body)
+      });
 
-  // Agrega movimiento, recalcula saldo y notifica a tab1 y tab2
-  addMovement(item: Movement) {
-    const current = this.movementsSubject.value;
-    const updated = [item, ...current];
-    this.saveMovements(updated);
-    this.movementsSubject.next(updated);
-
-    const newBalance = this.balanceSubject.value + item.amount;
-    this.saveBalance(newBalance);
-    this.balanceSubject.next(newBalance);
+      if (res.ok) {
+        await this.refreshData();
+        return true;
+      }
+    } catch (err) {
+      console.error('Error al guardar movimiento en Laravel:', err);
+    }
+    return false;
   }
 }

@@ -48,7 +48,7 @@ export class LoginPage {
     this.showPassword = !this.showPassword;
   }
 
-  onLogin() {
+    async onLogin() {
     if (!this.email || !this.password) {
       alert('Por favor ingresa tu correo y contraseña');
       return;
@@ -56,9 +56,39 @@ export class LoginPage {
 
     this.isLoading = true;
 
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://127.0.0.1:8000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          email: this.email.trim(),
+          password: this.password.trim()
+        })
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        const token = data.data?.token || data.token;
+        const user = data.data?.user || data.user;
+
+        localStorage.setItem('auth_token', token);
+        if (user) {
+          localStorage.setItem('user_info', JSON.stringify(user));
+        }
+
+        this.router.navigate(['/tabs/tab1'], { replaceUrl: true });
+      } else {
+        alert(data.message || 'Credenciales incorrectas');
+      }
+    } catch (error) {
+      console.error('Error al conectar con la API:', error);
+      alert('No se pudo conectar con el servidor backend en el puerto 8000');
+    } finally {
       this.isLoading = false;
-      this.router.navigate(['/tabs/tab1'], { replaceUrl: true });
-    }, 1500);
+    }
   }
 }

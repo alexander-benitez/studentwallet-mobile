@@ -1,0 +1,7 @@
+{
+  "name": "studenWalletMovil",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone"
+}

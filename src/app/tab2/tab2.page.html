@@ -1,0 +1,84 @@
+<ion-content class="movements-content" [fullscreen]="true">
+  <div class="movements-wrapper">
+    <!-- Título principal -->
+    <h1 class="page-title">Movimientos</h1>
+
+    <!-- Filtros tipo Pastilla: Todos, Ingresos, Gastos -->
+    <div class="pill-filters">
+      <button 
+        class="pill-btn" 
+        [class.active]="typeFilter === 'all'" 
+        (click)="typeFilter = 'all'">
+        Todos
+      </button>
+      <button 
+        class="pill-btn" 
+        [class.active]="typeFilter === 'income'" 
+        (click)="typeFilter = 'income'">
+        Ingresos
+      </button>
+      <button 
+        class="pill-btn" 
+        [class.active]="typeFilter === 'expense'" 
+        (click)="typeFilter = 'expense'">
+        Gastos
+      </button>
+    </div>
+
+    <!-- Menús Desplegables: Categoría y Fecha -->
+    <div class="dropdown-row">
+      <!-- Selector de Categoría -->
+      <div class="dropdown-box">
+        <select [(ngModel)]="selectedCategory">
+          <option value="all">Categoría</option>
+          <option *ngFor="let cat of categories" [value]="cat">{{ cat }}</option>
+        </select>
+        <ion-icon name="chevron-down-outline" class="select-arrow"></ion-icon>
+      </div>
+
+      <!-- Selector de Fecha -->
+      <div class="dropdown-box">
+        <select [(ngModel)]="selectedDate">
+          <option value="all">Fecha</option>
+          <option value="week">Esta semana</option>
+          <option value="month">Este mes</option>
+        </select>
+        <ion-icon name="chevron-down-outline" class="select-arrow"></ion-icon>
+      </div>
+    </div>
+
+    <!-- Lista de Movimientos -->
+    <div class="movements-list">
+      <div class="movement-card" *ngFor="let item of filteredMovements">
+        <div class="card-left">
+          <div class="icon-avatar" [style.background]="item.iconBg">
+            <ion-icon [name]="item.icon"></ion-icon>
+          </div>
+          <div class="card-texts">
+            <span class="category-name">{{ item.category }}</span>
+            <span class="date-note">{{ item.subtitle }}</span>
+          </div>
+        </div>
+
+        <div class="card-right">
+          <span class="amount" [ngClass]="item.isExpense ? 'expense' : 'income'">
+            {{ item.isExpense ? '-' : '+' }}${{ (item.amount < 0 ? -item.amount : item.amount) | number:'1.2-2' }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Mensaje cuando no hay registros con los filtros seleccionados -->
+      <div class="empty-state" *ngIf="filteredMovements.length === 0">
+        <p>No se encontraron movimientos con los filtros aplicados.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón Flotante Morado (+) -->
+  <<!-- Botón Flotante Morado (+) -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fab-plus">
+    <ion-fab-button (click)="openAddModal()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

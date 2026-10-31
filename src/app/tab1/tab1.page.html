@@ -1,0 +1,140 @@
+<ion-content class="dashboard-content" [fullscreen]="true">
+  <div class="dashboard-wrapper">
+    <!-- Saludo -->
+    <div class="header-greeting">
+      <h1>¡Hola, {{ userName }}! 👋</h1>
+      <p>Este es el resumen de tus finanzas.</p>
+    </div>
+
+    <!-- Tarjeta Gradiente de Saldo Disponible -->
+    <div class="balance-card">
+      <span class="label-muted">Saldo disponible</span>
+      <h2 class="balance-amount">${{ availableBalance | number:'1.2-2' }}</h2>
+
+      <div class="balance-subcards">
+        <div class="subcard">
+          <span class="subcard-title">↗ Ingresos</span>
+          <span class="subcard-val">${{ monthlyIncome | number }}</span>
+        </div>
+        <div class="subcard">
+          <span class="subcard-title">↘ Gastos</span>
+          <span class="subcard-val">${{ monthlyExpense | number }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Métricas Rápidas: Ingresos, Gastos, Ahorro -->
+    <div class="metrics-row">
+      <div class="metric-card">
+        <span class="metric-title">Ingresos</span>
+        <span class="metric-amount green">+${{ monthlyIncome | number }}</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Gastos</span>
+        <span class="metric-amount red">-${{ monthlyExpense | number }}</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-title">Ahorro</span>
+        <span class="metric-amount green">${{ savings | number }}</span>
+      </div>
+    </div>
+
+    <!-- Botones de Acción Rápida -->
+    <div class="quick-actions">
+      <button type="button" class="action-btn" (click)="openMovementModal('ingreso')">
+        <ion-icon name="add-outline"></ion-icon>
+        <span>Ingreso</span>
+      </button>
+      <button type="button" class="action-btn" (click)="openMovementModal('gasto')">
+        <ion-icon name="remove-outline"></ion-icon>
+        <span>Gasto</span>
+      </button>
+      <button type="button" class="action-btn" (click)="openGoalModal()">
+        <ion-icon name="disc-outline" class="target-icon"></ion-icon>
+        <span>Nueva meta</span>
+      </button>
+    </div>
+
+    <!-- Tarjeta Presupuesto -->
+    <div class="budget-section">
+      <h3 class="section-title">Presupuesto</h3>
+      <div class="budget-card">
+        <div class="budget-header">
+          <span class="title">Presupuesto del mes</span>
+          <span class="ratio">${{ budgetUsed }} / ${{ budgetTotal }}</span>
+        </div>
+        <ion-progress-bar [value]="budgetPercent" class="budget-progress"></ion-progress-bar>
+        <span class="percent-label">{{ (budgetPercent * 100) | number:'1.0-0' }}% utilizado</span>
+      </div>
+    </div>
+
+    <!-- Sección Últimos Movimientos -->
+    <div class="movements-section">
+      <div class="section-header">
+        <h3 class="section-title">Últimos movimientos</h3>
+        <a class="see-all-link" routerLink="/tabs/tab2">Ver todos</a>
+      </div>
+
+      <div class="movements-list">
+        <div class="movement-card" *ngFor="let item of recentMovements">
+          <div class="card-left">
+            <div class="icon-avatar" [style.background]="item.iconBg">
+              <ion-icon [name]="item.icon"></ion-icon>
+            </div>
+            <div class="card-texts">
+              <span class="category-name">{{ item.category }}</span>
+              <span class="date-note">{{ item.subtitle }}</span>
+            </div>
+          </div>
+
+          <div class="card-right">
+            <span class="amount" [ngClass]="item.isExpense ? 'expense' : 'income'">
+              {{ item.isExpense ? '-' : '+' }}${{ (item.amount < 0 ? -item.amount : item.amount) | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección Mis Metas -->
+    <div class="goals-section">
+      <div class="section-header">
+        <h3 class="section-title">Mis metas</h3>
+        <a class="see-all-link" routerLink="/tabs/tab3">Ver todas</a>
+      </div>
+
+      <div class="goal-card">
+        <div class="goal-header">
+          <div class="goal-title-wrap">
+            <span class="goal-icon">💻</span>
+            <span class="goal-name">Comprar una laptop</span>
+          </div>
+          <span class="goal-percent">60%</span>
+        </div>
+        <ion-progress-bar [value]="0.6" class="goal-progress"></ion-progress-bar>
+        <div class="goal-footer">
+          <span class="saved-amount">$420 / $700</span>
+          <span class="remaining-amount">Faltan $280</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección Consejos para ti -->
+    <div class="tips-card">
+      <div class="tip-icon-box">
+        💡
+      </div>
+      <div class="tip-texts">
+        <h4>Consejos para ti</h4>
+        <p>Mira qué puedes mejorar este mes</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón Flotante Morado (+) -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fab-plus">
+    <ion-fab-button (click)="openMovementModal('gasto')">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

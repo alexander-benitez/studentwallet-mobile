@@ -1,0 +1,124 @@
+
+
+html, body {
+  font-family: 'Inter', sans-serif !important;
+}
+.welcome-content {
+  --background: linear-gradient(180deg, #132450 0%, #070c1a 60%);
+}
+
+.welcome-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100%;
+  padding: 32px 24px;
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+
+  .logo-box {
+    width: 44px;
+    height: 44px;
+    background: #3b82f6;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 24px;
+  }
+
+  .brand-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+}
+
+.hero-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 0;
+
+  .chart-mock {
+    display: flex;
+    align-items: flex-end;
+    gap: 14px;
+    height: 180px;
+
+    .bar {
+      width: 44px;
+      border-radius: 10px;
+    }
+
+    .bar-1 { height: 70px; background: #3b4d6b; }
+    .bar-2 { height: 110px; background: #5b6e92; }
+    .bar-3 { height: 145px; background: #8b7ef8; }
+    .bar-4 { 
+      height: 180px; 
+      background: #10b981; 
+      position: relative;
+
+      .coin-badge {
+        position: absolute;
+        top: -24px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 38px;
+        height: 38px;
+        background: #f59e0b;
+        border-radius: 50%;
+        color: #ffffff;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4);
+      }
+    }
+  }
+}
+
+.action-footer {
+  h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #ffffff;
+    line-height: 1.2;
+    margin-bottom: 12px;
+  }
+
+  p {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+
+.btn-login {
+  --background: #ffffff;
+  --color: #070c1a;
+  --border-radius: 14px;
+  font-weight: 700;
+  font-size: 1rem;
+  height: 50px;
+  margin-bottom: 12px;
+  text-transform: none; /* Mantiene "Iniciar sesión" sin forzar mayúsculas */
+}
+
+.btn-register {
+  --background: rgba(255, 255, 255, 0.08);
+  --color: #ffffff;
+  --border-radius: 14px;
+  font-weight: 600;
+  font-size: 1rem;
+  height: 50px;
+  text-transform: none; /* Mantiene "Crear cuenta" sin forzar mayúsculas */
+}
+}

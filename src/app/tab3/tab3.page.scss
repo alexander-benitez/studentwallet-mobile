@@ -1,0 +1,202 @@
+.goals-content {
+  --background: #0b1120;
+  color: #ffffff;
+}
+
+.goals-wrapper {
+  padding: 24px 16px 100px 16px;
+  display: flex;
+  flex-direction: column;
+  max-width: 440px;
+  margin: 0 auto;
+}
+
+.main-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  margin: 0 0 20px 0;
+  color: #ffffff;
+}
+
+.goals-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.goal-card {
+  background: #121a2d;
+  border: 1px solid #1c273e;
+  border-radius: 16px;
+  padding: 16px;
+  cursor: pointer;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+
+  &:active {
+    transform: scale(0.99);
+    border-color: #2b3957;
+  }
+
+  .goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+
+    .title-box {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+
+      .icon {
+        font-size: 1.1rem;
+      }
+
+      .title {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #ffffff;
+      }
+    }
+
+    .percentage {
+      color: #10b981;
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+  }
+
+  .custom-progress {
+    --background: #1a253b;
+    --progress-background: #10b981;
+    height: 8px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+  }
+
+  .goal-footer {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    font-weight: 600;
+
+    .amounts {
+      color: #94a3b8;
+    }
+
+    .remaining {
+      color: #94a3b8;
+    }
+  }
+}
+
+.btn-toggle-goal {
+  width: 100%;
+  background: #2563eb;
+  border: none;
+  border-radius: 14px;
+  padding: 14px;
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-bottom: 16px;
+  transition: background 0.2s;
+
+  &:active {
+    background: #1d4ed8;
+  }
+}
+
+/* Tarjeta de Formulario Nueva Meta */
+.new-goal-card {
+  background: #121a2d;
+  border: 1px solid #1c273e;
+  border-radius: 20px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin: 0;
+    color: #ffffff;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    input {
+      background: #182238;
+      border: 1px solid #253350;
+      border-radius: 12px;
+      padding: 12px 14px;
+      color: #ffffff;
+      font-size: 0.9rem;
+      outline: none;
+
+      &::placeholder {
+        color: #64748b;
+      }
+
+      &:focus {
+        border-color: #3b82f6;
+      }
+    }
+  }
+
+  .btn-create-goal {
+    background: #2563eb;
+    border: none;
+    border-radius: 12px;
+    padding: 14px;
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+    margin-top: 4px;
+
+    &:active {
+      background: #1d4ed8;
+    }
+  }
+
+  .btn-cancel-goal {
+    background: transparent;
+    border: none;
+    color: #94a3b8;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    padding: 6px;
+
+    &:active {
+      color: #ffffff;
+    }
+  }
+}
+
+/* Botón flotante morado (+) */
+.fab-purple {
+  margin-bottom: 60px;
+  margin-inline-end: 12px;
+
+  ion-fab-button {
+    --background: #8b5cf6;
+    --color: #ffffff;
+    --box-shadow: 0 4px 20px rgba(139, 92, 246, 0.5);
+    width: 54px;
+    height: 54px;
+  }
+}

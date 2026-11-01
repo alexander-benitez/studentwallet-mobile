@@ -1,17 +1,78 @@
-<ion-header [translucent]="true">
-  <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
-  </ion-toolbar>
-</ion-header>
+<ion-content class="goals-content" [fullscreen]="true">
+  <div class="goals-wrapper">
+    
+    <!-- Encabezado -->
+    <h1 class="main-title">Mis metas</h1>
 
-<ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+    <!-- Lista de Metas -->
+    <div class="goals-list">
+      <div 
+        class="goal-card" 
+        *ngFor="let goal of goals"
+        (click)="openContributionModal(goal)"
+      >
+        <div class="goal-header">
+          <div class="title-box">
+            <span class="icon">{{ goal.icon || '🎯' }}</span>
+            <span class="title">{{ goal.title }}</span>
+          </div>
+          <span class="percentage">{{ getPercentLabel(goal) }}%</span>
+        </div>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+        <!-- Barra de progreso verde -->
+        <ion-progress-bar [value]="getPercent(goal)" class="custom-progress"></ion-progress-bar>
+
+        <div class="goal-footer">
+          <span class="amounts">${{ goal.currentAmount | number:'1.0-0' }} / ${{ goal.targetAmount | number:'1.0-0' }}</span>
+          <span class="remaining">
+            {{ goal.currentAmount >= goal.targetAmount ? '¡Alcanzada!' : 'Faltan $' + ((goal.targetAmount - goal.currentAmount) | number:'1.0-0') }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botón desplegable azul + Nueva meta -->
+    <button type="button" class="btn-toggle-goal" (click)="toggleNewGoalForm()">
+      + Nueva meta
+    </button>
+
+    <!-- Tarjeta desplegable "Nueva meta 🎯" -->
+    <div class="new-goal-card" *ngIf="showNewGoalForm">
+      <h2>Nueva meta 🎯</h2>
+
+      <div class="form-group">
+        <label>Nombre</label>
+        <input 
+          type="text" 
+          placeholder="Ej. Comprar una laptop" 
+          [(ngModel)]="newGoalTitle"
+        />
+      </div>
+
+      <div class="form-group">
+        <label>Monto a ahorrar</label>
+        <input 
+          type="number" 
+          placeholder="$0.00" 
+          [(ngModel)]="newGoalTarget"
+        />
+      </div>
+
+      <button type="button" class="btn-create-goal" (click)="createGoal()">
+        Crear meta
+      </button>
+
+      <button type="button" class="btn-cancel-goal" (click)="cancelNewGoal()">
+        Cancelar
+      </button>
+    </div>
+
+  </div>
+
+<!-- Botón flotante morado (+) -->
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fab-purple">
+    <ion-fab-button (click)="toggleNewGoalForm()">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
 </ion-content>

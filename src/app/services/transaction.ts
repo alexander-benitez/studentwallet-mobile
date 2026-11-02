@@ -12,6 +12,15 @@ export interface Movement {
   period: 'week' | 'month';
 }
 
+export interface Goal {
+  id: number | string;
+  title: string;
+  targetAmount: number;
+  currentAmount: number;
+  icon?: string;
+  deadline?: string;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -23,6 +32,13 @@ export class TransactionService {
 
   private balanceSubject = new BehaviorSubject<number>(0);
   balance$ = this.balanceSubject.asObservable();
+
+  // Estados reactivos para Metas
+  private goalsSubject = new BehaviorSubject<Goal[]>([
+    { id: 1, title: 'Comprar una laptop', targetAmount: 700, currentAmount: 420, icon: '💻' },
+    { id: 2, title: 'Fondo de emergencia', targetAmount: 300, currentAmount: 150, icon: '🛡️' }
+  ]);
+  goals$ = this.goalsSubject.asObservable();
 
   constructor() {
     this.refreshData();
@@ -119,5 +135,44 @@ export class TransactionService {
       console.error('Error al guardar movimiento en Laravel:', err);
     }
     return false;
+  }
+
+<<<<<<< HEAD
+  // Métodos para la gestión de Metas
+=======
+  // Métodos para la gestión de Metas (MOV-05-01)
+>>>>>>> fccb14a6b82bb48ea6d5d08c47ce49d61e25e4da
+  addGoal(goal: Goal) {
+    const current = this.goalsSubject.getValue();
+    const updated = [ { ...goal, id: Date.now() }, ...current ];
+    this.goalsSubject.next(updated);
+  }
+
+  addContribution(goalId: number | string, amount: number) {
+    const current = this.goalsSubject.getValue();
+    const updated = current.map(g => {
+      if (g.id === goalId) {
+        const newAmount = Math.min(g.currentAmount + amount, g.targetAmount);
+        return { ...g, currentAmount: newAmount };
+      }
+      return g;
+    });
+    this.goalsSubject.next(updated);
+
+<<<<<<< HEAD
+    // Registramos automáticamente el aporte como movimiento
+=======
+    // Registramos automáticamente el aporte como un gasto o movimiento si se desea reflejar en saldo
+>>>>>>> fccb14a6b82bb48ea6d5d08c47ce49d61e25e4da
+    this.addMovement({
+      id: Date.now(),
+      category: 'Ahorro',
+      subtitle: `Aporte a meta`,
+      amount: -Math.abs(amount),
+      isExpense: true,
+      icon: 'disc-outline',
+      iconBg: '#2a2216',
+      period: 'week'
+    });
   }
 }

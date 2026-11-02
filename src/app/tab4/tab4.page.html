@@ -1,0 +1,100 @@
+<ion-content class="ion-padding statistics-content">
+  <!-- Cabecera -->
+  <div class="header-container">
+    <h2>Estadísticas Financieras</h2>
+    <p class="subtitle">Resumen de tus ingresos y gastos</p>
+  </div>
+
+  <!-- 3 Tarjetas de Resumen (Ingresos, Gastos, Ahorro) -->
+  <div class="summary-cards-grid">
+    <div class="summary-card">
+      <span class="card-label">Recibí</span>
+      <span class="card-value income">${{ totalIncome | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="card-label">Gasté</span>
+      <span class="card-value expense">${{ totalExpense | number:'1.2-2' }}</span>
+    </div>
+    <div class="summary-card">
+      <span class="card-label">Ahorro</span>
+      <span class="card-value savings">${{ totalSavings | number:'1.2-2' }}</span>
+    </div>
+  </div>
+
+  <!-- Gastos por Categoría -->
+  <div class="section-block">
+    <h3>Gastos por Categoría</h3>
+    
+    <div class="main-card" *ngIf="categoryStats.length > 0">
+      <div class="multi-progress-bar">
+        <div *ngFor="let cat of categoryStats" [style.width.%]="cat.percentage * 100" [style.background-color]="cat.color"></div>
+      </div>
+      <p class="insight-text">
+        {{ categoryStats[0]?.name }} es tu mayor gasto: <strong>${{ categoryStats[0]?.amount }}</strong>.
+      </p>
+
+      <div class="category-rows">
+        <div class="cat-row" *ngFor="let cat of categoryStats">
+          <div class="cat-left">
+            <div class="cat-icon-box" [style.background-color]="cat.color + '20'">
+              <ion-icon [name]="cat.icon" [style.color]="cat.color"></ion-icon>
+            </div>
+            <div class="cat-titles">
+              <span class="cat-title">{{ cat.name }}</span>
+              <span class="cat-sub" [style.color]="cat.color">● {{ (cat.percentage * 100) | number:'1.0-0' }}% de tus gastos</span>
+            </div>
+          </div>
+          <span class="cat-price">${{ cat.amount }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mensaje si no hay movimientos -->
+    <div class="main-card empty-card" *ngIf="categoryStats.length === 0">
+      <p class="empty-text">No hay suficientes movimientos para mostrar estadísticas todavía.</p>
+    </div>
+  </div>
+
+  <!-- Gráfica de Ingresos vs Gastos -->
+  <div class="section-block" *ngIf="monthlyStats.length > 0">
+    <h3>Ingresos vs gastos</h3>
+    <div class="main-card chart-card">
+      <div class="bars-container">
+        <div class="bar-group" *ngFor="let stat of monthlyStats">
+          <div class="bars-pair">
+            <div class="bar income-bar" [style.height.px]="stat.maxHeightIncome"></div>
+            <div class="bar expense-bar" [style.height.px]="stat.maxHeightExpense"></div>
+          </div>
+          <span class="bar-label">{{ stat.monthName }}</span>
+        </div>
+      </div>
+      <div class="chart-legend">
+        <span class="legend-item"><span class="dot income-dot"></span> Ingresos</span>
+        <span class="legend-item"><span class="dot expense-dot"></span> Gastos</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Evolución del ahorro -->
+  <div class="section-block" *ngIf="monthlyStats.length > 0">
+    <h3>Evolución del ahorro</h3>
+    <div class="main-card savings-chart-card">
+      <div class="trend-line-container">
+        <svg viewBox="0 0 300 100" class="trend-svg">
+          <path [attr.d]="savingsPoints" fill="none" stroke="#8b5cf6" stroke-width="3" />
+          <circle *ngFor="let m of monthlyStats; let i = index" 
+                  [attr.cx]="15 + (i * 68)" 
+                  [attr.cy]="50" 
+                  r="5" fill="#8b5cf6" />
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Botón flotante morado con el signo + asegurado -->
+<ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fab-purple-container">
+    <ion-fab-button (click)="openAddMovement()" class="fab-purple-btn">
+      <ion-icon name="add-outline"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>

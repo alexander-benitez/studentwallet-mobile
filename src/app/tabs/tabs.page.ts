@@ -1,35 +1,32 @@
 import { Component } from '@angular/core';
-import { 
-  IonTabs, 
-  IonTabBar, 
-  IonTabButton, 
-  IonIcon, 
-  IonLabel 
-} from '@ionic/angular';
+import { CommonModule } from '@angular/common';
+import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { 
-  homeOutline, 
-  swapVerticalOutline, 
-  discOutline, 
-  barChartOutline, 
-  personOutline 
-} from 'ionicons/icons';
+import { homeOutline, swapVerticalOutline, flagOutline, barChartOutline, personOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-tabs',
   templateUrl: 'tabs.page.html',
   styleUrls: ['tabs.page.scss'],
   standalone: true,
-  imports: [IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel],
+  imports: [
+    CommonModule,
+    IonTabs,
+    IonTabBar,
+    IonTabButton,
+    IonIcon,
+    IonLabel
+  ]
 })
 export class TabsPage {
   constructor() {
-    addIcons({ 
-      homeOutline, 
-      swapVerticalOutline, 
-      discOutline, 
-      barChartOutline, 
-      personOutline 
+    // Registramos todos los iconos de la barra inferior de manera explícita
+    addIcons({
+      homeOutline,
+      swapVerticalOutline,
+      flagOutline,
+      barChartOutline,
+      personOutline
     });
   }
 }

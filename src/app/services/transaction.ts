@@ -137,7 +137,7 @@ export class TransactionService {
     return false;
   }
 
-  // Métodos para la gestión de Metas (MOV-05-01)
+  // Métodos para la gestión de Metas
   addGoal(goal: Goal) {
     const current = this.goalsSubject.getValue();
     const updated = [ { ...goal, id: Date.now() }, ...current ];
@@ -155,7 +155,7 @@ export class TransactionService {
     });
     this.goalsSubject.next(updated);
 
-    // Registramos automáticamente el aporte como un gasto o movimiento si se desea reflejar en saldo
+    // Registramos automáticamente el aporte como movimiento
     this.addMovement({
       id: Date.now(),
       category: 'Ahorro',

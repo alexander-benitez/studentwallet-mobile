@@ -1,0 +1,94 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="budgets-toolbar">
+    <ion-title>Presupuestos</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="budgets-content" [fullscreen]="true">
+  <div class="page-wrapper">
+    <div class="intro">
+      <div class="intro-icon">
+        <ion-icon name="wallet-outline"></ion-icon>
+      </div>
+      <h1>Controla tus límites</h1>
+      <p>Revisa cuánto has gastado frente al presupuesto de cada categoría.</p>
+    </div>
+
+    @if (!loading && budgets.length > 0) {
+      <div class="summary-card">
+        <div class="summary-header">
+          <div>
+            <span class="summary-label">Gasto total del mes</span>
+            <h2>${{ totalSpent | number:'1.2-2' }} <span>/ ${{ totalLimit | number:'1.2-2' }}</span></h2>
+          </div>
+          <ion-icon name="trending-up-outline"></ion-icon>
+        </div>
+        <ion-progress-bar [value]="overallProgress" color="primary"></ion-progress-bar>
+        <span class="summary-percent">{{ (overallProgress * 100) | number:'1.0-0' }}% utilizado</span>
+      </div>
+    }
+
+    @if (loading) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Cargando presupuestos...</span>
+      </div>
+    }
+
+    @if (!loading && budgets.length === 0) {
+      <div class="empty-state">
+        <ion-icon name="wallet-outline"></ion-icon>
+        <p>Aún no tienes presupuestos registrados.</p>
+      </div>
+    }
+
+    @if (!loading && budgets.length > 0) {
+      <div class="budget-list">
+        @for (budget of budgets; track budget.id) {
+          <div
+            class="budget-card"
+            [ngClass]="'alert-' + budget.alert">
+
+            <div class="budget-header">
+              <div class="category-info">
+                <div class="category-icon">
+                  <ion-icon name="wallet-outline"></ion-icon>
+                </div>
+                <div class="category-texts">
+                  <span class="category-name">{{ getCategoryName(budget) }}</span>
+                  <span class="category-period">
+                    {{ getMonthName(budget.month) }} {{ budget.year }}
+                  </span>
+                </div>
+              </div>
+
+              <div class="alert-badge" [ngClass]="'alert-' + budget.alert">
+                <ion-icon [name]="getAlertIcon(budget.alert)"></ion-icon>
+                <span>{{ getAlertLabel(budget.alert) }}</span>
+              </div>
+            </div>
+
+            <div class="budget-amounts">
+              <span class="spent">${{ getSpent(budget) | number:'1.2-2' }}</span>
+              <span class="limit">/ ${{ getLimit(budget) | number:'1.2-2' }}</span>
+            </div>
+
+            <ion-progress-bar
+              [value]="getProgress(budget)"
+              [color]="getAlertColor(budget.alert)"
+              class="budget-progress">
+            </ion-progress-bar>
+
+            <div class="budget-footer">
+              <span class="percentage">{{ getPercentage(budget) | number:'1.0-1' }}% utilizado</span>
+              <span class="remaining">
+                {{ getSpent(budget) > getLimit(budget) ? 'Excedido' : 'Disponible' }}:
+                ${{ (getLimit(budget) - getSpent(budget) < 0 ? getSpent(budget) - getLimit(budget) : getLimit(budget) - getSpent(budget)) | number:'1.2-2' }}
+              </span>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+</ion-content>

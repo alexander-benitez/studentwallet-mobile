@@ -21,11 +21,21 @@ export const routes: Routes = [
         loadComponent: () =>
           import('../tab3/tab3.page').then((m) => m.Tab3Page),
       },
-     {
+      {
         path: 'tab4',
-        loadComponent: () => 
-          import('../tab4/tab4.page').then(m => m.Tab4Page)
-     }
+        loadComponent: () =>
+          import('../tab4/tab4.page').then((m) => m.Tab4Page),
+      },
+      {
+        path: 'comments',
+        loadComponent: () =>
+          import('../pages/comments/comments.page').then((m) => m.CommentsPage),
+      },
+      {
+        path: 'budgets',
+        loadComponent: () =>
+          import('../pages/budgets/budgets.page').then((m) => m.BudgetsPage),
+      }
     ],
   },
   {

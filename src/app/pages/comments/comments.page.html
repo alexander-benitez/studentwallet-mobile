@@ -1,0 +1,101 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="comments-toolbar">
+    <ion-title>Comentarios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="comments-content" [fullscreen]="true">
+  <div class="page-wrapper">
+    <div class="intro">
+      <div class="intro-icon">
+        <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+      </div>
+      <h1>Envíanos tu opinión</h1>
+      <p>Cuéntanos qué podemos mejorar en StudentWallet.</p>
+    </div>
+
+    <div class="form-card">
+      <ion-item class="field-item" lines="none">
+        <ion-label position="stacked">Categoría</ion-label>
+        <ion-select
+          [(ngModel)]="category"
+          placeholder="Selecciona una categoría"
+          interface="popover"
+          class="category-select">
+          @for (option of categories; track option) {
+            <ion-select-option [value]="option">
+              {{ option }}
+            </ion-select-option>
+          }
+        </ion-select>
+      </ion-item>
+
+      <ion-item class="field-item textarea-item" lines="none">
+        <ion-label position="stacked">Comentario</ion-label>
+        <ion-textarea
+          [(ngModel)]="message"
+          placeholder="Escribe tu comentario..."
+          [autoGrow]="true"
+          [maxlength]="1000"
+          rows="4">
+        </ion-textarea>
+      </ion-item>
+
+      <ion-button
+        expand="block"
+        class="send-button"
+        [disabled]="sending"
+        (click)="sendSuggestion()">
+        <ion-icon slot="start" name="send-outline"></ion-icon>
+        {{ sending ? 'Enviando...' : 'Enviar comentario' }}
+      </ion-button>
+    </div>
+
+    <div class="list-section">
+      <div class="section-header">
+        <h2>Mis comentarios</h2>
+        <span class="count">{{ suggestions.length }}</span>
+      </div>
+
+      @if (loading) {
+        <div class="loading-state">
+          <ion-spinner name="crescent"></ion-spinner>
+          <span>Cargando comentarios...</span>
+        </div>
+      }
+
+      @if (!loading && suggestions.length === 0) {
+        <div class="empty-state">
+          <ion-icon name="chatbubble-ellipses-outline"></ion-icon>
+          <p>Aún no has enviado comentarios.</p>
+        </div>
+      }
+
+      @if (!loading && suggestions.length > 0) {
+        <ion-list class="suggestions-list">
+          @for (item of suggestions; track item.id) {
+            <div class="suggestion-card">
+              <div class="suggestion-top">
+                <span class="suggestion-title">{{ item.title || 'Comentario' }}</span>
+                <ion-badge [color]="statusColor(item.status)">
+                  {{ statusLabel(item.status) }}
+                </ion-badge>
+              </div>
+              <p class="suggestion-message">{{ item.message }}</p>
+              <span class="suggestion-date">{{ formatDate(item.created_at) }}</span>
+            </div>
+          }
+        </ion-list>
+      }
+    </div>
+  </div>
+
+  <ion-toast
+    [isOpen]="toastOpen"
+    [message]="toastMessage"
+    [color]="toastColor"
+    [duration]="2500"
+    position="bottom"
+    (didDismiss)="toastOpen = false">
+  </ion-toast>
+</ion-content>

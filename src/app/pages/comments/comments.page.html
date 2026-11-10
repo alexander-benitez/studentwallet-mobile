@@ -41,6 +41,22 @@
         </ion-textarea>
       </ion-item>
 
+      <div class="rating-container ion-text-center">
+        <ion-label position="stacked" class="rating-label">Calificación</ion-label>
+        <div class="rating-stars">
+          @for (starValue of [1, 2, 3, 4, 5]; track starValue) {
+            <ion-icon
+              [name]="rating >= starValue ? 'star' : 'star-outline'"
+              [color]="rating >= starValue ? 'warning' : 'medium'"
+              size="large"
+              class="rating-star"
+              (click)="setRating(starValue)">
+            </ion-icon>
+          }
+        </div>
+        <span class="rating-hint">{{ rating > 0 ? rating + '/5' : 'Toca una estrella' }}</span>
+      </div>
+
       <ion-button
         expand="block"
         class="send-button"

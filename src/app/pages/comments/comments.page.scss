@@ -79,6 +79,41 @@
   align-items: flex-start;
 }
 
+.rating-container {
+  margin: 4px 0 12px;
+  padding: 4px 12px;
+
+  .rating-label {
+    display: block;
+    margin-bottom: 6px;
+    color: #94a3b8;
+    font-size: 0.8rem;
+  }
+
+  .rating-stars {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+
+    .rating-star {
+      cursor: pointer;
+      transition: transform 0.15s ease;
+
+      &:active {
+        transform: scale(1.2);
+      }
+    }
+  }
+
+  .rating-hint {
+    display: block;
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 0.78rem;
+  }
+}
+
 .send-button {
   --background: #2563eb;
   --background-hover: #1d4ed8;

@@ -23,7 +23,9 @@ import {
   chatbubbleEllipsesOutline,
   sendOutline,
   checkmarkCircleOutline,
-  alertCircleOutline
+  alertCircleOutline,
+  star,
+  starOutline
 } from 'ionicons/icons';
 import { ApiService, Suggestion } from '../../services/api.service';
 
@@ -57,6 +59,7 @@ export class CommentsPage implements OnInit {
 
   category = '';
   message = '';
+  rating: number = 0;
 
   suggestions: Suggestion[] = [];
   loading = false;
@@ -73,7 +76,9 @@ export class CommentsPage implements OnInit {
       chatbubbleEllipsesOutline,
       sendOutline,
       checkmarkCircleOutline,
-      alertCircleOutline
+      alertCircleOutline,
+      star,
+      starOutline
     });
   }
 
@@ -95,21 +100,31 @@ export class CommentsPage implements OnInit {
     });
   }
 
+  setRating(value: number) {
+    this.rating = value;
+  }
+
   sendSuggestion() {
     if (!this.category || !this.message.trim()) {
       this.showToast('Selecciona una categoría y escribe tu comentario.', 'warning');
       return;
     }
 
+    if (this.rating === 0) {
+      this.showToast('Selecciona al menos 1 estrella para calificar.', 'danger');
+      return;
+    }
+
     this.sending = true;
     this.api.createSuggestion({
       title: this.category,
-      message: this.message.trim()
+      message: `[Calificación: ${this.rating}/5] ${this.message.trim()}`
     }).subscribe({
       next: () => {
         this.sending = false;
         this.category = '';
         this.message = '';
+        this.rating = 0;
         this.showToast('¡Comentario enviado con éxito!', 'success');
         this.loadSuggestions();
       },

@@ -2,6 +2,14 @@ import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
+import { TransactionService } from '../../services/transaction';
+
+interface Category {
+  id: number;
+  name: string;
+  type: 'ingreso' | 'gasto';
+  icon?: string;
+}
 
 @Component({
   selector: 'app-add-movement-modal',
@@ -15,47 +23,50 @@ export class AddMovementModalComponent implements OnInit {
 
   type: 'ingreso' | 'gasto' = 'gasto';
   amount: number = 0;
-  selectedCategory: string = 'Alimentación';
-  date: string = '2026-10-07';
+  selectedCategoryId: number | null = null;
+  date: string = new Date().toISOString().split('T')[0];
   description: string = '';
+  categories: Category[] = [];
 
-  expenseCategories = [
-    { name: 'Alimentación', icon: '🍔' },
-    { name: 'Transporte', icon: '🚌' },
-    { name: 'Estudios', icon: '📚' },
-    { name: 'Entretenimiento', icon: '🎮' },
-    { name: 'Otros', icon: '🏠' },
-  ];
+  constructor(
+    private modalCtrl: ModalController,
+    private transactionService: TransactionService
+  ) {}
 
-  incomeCategories = [
-    { name: 'Beca', icon: '💰' },
-    { name: 'Mesada', icon: '🛡️' },
-    { name: 'Otros', icon: '🏠' },
-  ];
-
-  constructor(private modalCtrl: ModalController) {}
-
-  ngOnInit() {
+  async ngOnInit() {
+    await this.loadCategories();
     if (this.initialType) {
       this.setType(this.initialType);
     }
   }
 
-  get currentCategories() {
-    return this.type === 'gasto' ? this.expenseCategories : this.incomeCategories;
+  private async loadCategories() {
+    const categories = await this.transactionService.getCategories();
+    this.categories = categories.map((cat: any) => ({
+      id: Number(cat.id),
+      name: cat.name,
+      type: cat.type,
+      icon: this.getCategoryEmoji(cat.name)
+    }));
+  }
+
+  get currentCategories(): Category[] {
+    return this.categories.filter(cat => cat.type === this.type);
   }
 
   setType(selectedType: 'ingreso' | 'gasto') {
     this.type = selectedType;
-    if (this.type === 'ingreso') {
-      this.selectedCategory = 'Beca';
-    } else {
-      this.selectedCategory = 'Alimentación';
-    }
+    const firstCategory = this.currentCategories[0];
+    this.selectedCategoryId = firstCategory ? firstCategory.id : null;
   }
 
-  selectCategory(name: string) {
-    this.selectedCategory = name;
+  selectCategory(id: number) {
+    this.selectedCategoryId = id;
+  }
+
+  private get selectedCategoryName(): string {
+    const match = this.categories.find(cat => cat.id === this.selectedCategoryId);
+    return match ? match.name : '';
   }
 
   cancel() {
@@ -68,12 +79,19 @@ export class AddMovementModalComponent implements OnInit {
       return;
     }
 
+    if (!this.selectedCategoryId) {
+      alert('Debes seleccionar una categoría');
+      return;
+    }
+
+    const categoryName = this.selectedCategoryName;
     const newMovement = {
-      category: this.selectedCategory,
+      categoryId: Number(this.selectedCategoryId),
+      category: categoryName,
       subtitle: this.description ? `Hoy · ${this.description}` : 'Hoy · Movimiento',
       amount: this.type === 'gasto' ? -Math.abs(this.amount) : Math.abs(this.amount),
       isExpense: this.type === 'gasto',
-      icon: this.getIconForCategory(this.selectedCategory),
+      icon: this.getIconForCategory(categoryName),
       iconBg: this.type === 'gasto' ? '#2a2216' : '#133023',
       period: 'week' as const
     };
@@ -81,9 +99,23 @@ export class AddMovementModalComponent implements OnInit {
     this.modalCtrl.dismiss(newMovement, 'created');
   }
 
+  private getCategoryEmoji(cat: string): string {
+    switch (cat) {
+      case 'Alimentación':
+      case 'Comida': return '🍔';
+      case 'Transporte': return '🚌';
+      case 'Estudios': return '📚';
+      case 'Entretenimiento': return '🎮';
+      case 'Beca': return '💰';
+      case 'Mesada': return '🛡️';
+      default: return '🏠';
+    }
+  }
+
   private getIconForCategory(cat: string): string {
     switch (cat) {
-      case 'Alimentación': return 'fast-food-outline';
+      case 'Alimentación':
+      case 'Comida': return 'fast-food-outline';
       case 'Transporte': return 'bus-outline';
       case 'Estudios': return 'book-outline';
       case 'Entretenimiento': return 'game-controller-outline';

@@ -36,8 +36,8 @@
         type="button"
         class="chip-item" 
         *ngFor="let cat of currentCategories" 
-        [class.selected]="selectedCategory === cat.name" 
-        (click)="selectCategory(cat.name)">
+        [class.selected]="selectedCategoryId === cat.id" 
+        (click)="selectCategory(cat.id)">
         <span class="chip-emoji">{{ cat.icon }}</span>
         <span>{{ cat.name }}</span>
       </button>

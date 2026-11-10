@@ -1,9 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { environment } from '../../environments/environment';
 
 export interface Movement {
   id: number;
   category: string;
+  categoryId?: number;
   subtitle: string;
   amount: number;
   isExpense: boolean;
@@ -25,8 +27,6 @@ export interface Goal {
   providedIn: 'root'
 })
 export class TransactionService {
-  private readonly API_BASE = 'http://127.0.0.1:8000/api';
-
   private movementsSubject = new BehaviorSubject<Movement[]>([]);
   movements$ = this.movementsSubject.asObservable();
 
@@ -62,12 +62,14 @@ export class TransactionService {
 
   async loadBalanceFromApi(): Promise<number> {
     try {
-      const res = await fetch(`${this.API_BASE}/balance`, {
+      const res = await fetch(`${environment.apiUrl}/balance`, {
         headers: this.getHeaders()
       });
       if (res.ok) {
         const json = await res.json();
-        const saldo = Number(json.data?.saldo_total ?? json.saldo_total ?? 0);
+        const totalIncomes = Number(json.data?.total_incomes ?? 0);
+        const totalExpenses = Number(json.data?.total_expenses ?? 0);
+        const saldo = Number(json.data?.balance ?? (totalIncomes - totalExpenses));
         this.balanceSubject.next(saldo);
         return saldo;
       }
@@ -79,7 +81,7 @@ export class TransactionService {
 
   async loadMovementsFromApi(): Promise<Movement[]> {
     try {
-      const res = await fetch(`${this.API_BASE}/transactions`, {
+      const res = await fetch(`${environment.apiUrl}/transactions`, {
         headers: this.getHeaders()
       });
       if (res.ok) {
@@ -94,6 +96,7 @@ export class TransactionService {
           return {
             id: item.id,
             category: categoryName,
+            categoryId: item.category?.id ?? item.category_id,
             subtitle: item.description || item.descripcion || 'Movimiento',
             amount: isExpense ? -absAmount : absAmount,
             isExpense: isExpense,
@@ -112,16 +115,42 @@ export class TransactionService {
     return [];
   }
 
+  async getCategories(): Promise<any[]> {
+    try {
+      const res = await fetch(`${environment.apiUrl}/categories`, {
+        headers: this.getHeaders()
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        return json.data || [];
+      }
+
+      const errorBody = await res.text();
+      console.error('Error al obtener categorías:', res.status, errorBody);
+    } catch (err) {
+      console.error('Error al obtener categorías:', err);
+    }
+    return [];
+  }
+
   async addMovement(item: Movement): Promise<boolean> {
     try {
+      const categoryId = Number(item.categoryId);
+
+      if (!categoryId || categoryId <= 0) {
+        throw new Error('Debes seleccionar una categoría válida');
+      }
+
       const body = {
-        amount: Math.abs(item.amount),
+        amount: Number(item.amount),
         type: item.isExpense ? 'gasto' : 'ingreso',
+        category_id: categoryId,
         description: item.subtitle || item.category,
-        category: item.category
+        date: new Date().toISOString().split('T')[0]
       };
 
-      const res = await fetch(`${this.API_BASE}/transactions`, {
+      const res = await fetch(`${environment.apiUrl}/transactions`, {
         method: 'POST',
         headers: this.getHeaders(),
         body: JSON.stringify(body)
@@ -131,6 +160,9 @@ export class TransactionService {
         await this.refreshData();
         return true;
       }
+
+      const errorBody = await res.text();
+      console.error('RESPUESTA DEL BACKEND:', res.status, errorBody);
     } catch (err) {
       console.error('Error al guardar movimiento en Laravel:', err);
     }

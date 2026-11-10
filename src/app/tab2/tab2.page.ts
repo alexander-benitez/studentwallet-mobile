@@ -37,15 +37,7 @@ export class Tab2Page implements OnInit, OnDestroy {
   selectedCategory: string = 'all';
   selectedDate: string = 'all';
 
-  categories = [
-    'Alimentación',
-    'Beca',
-    'Transporte',
-    'Mesada',
-    'Estudios',
-    'Entretenimiento',
-    'Otros'
-  ];
+  categories: string[] = [];
 
   movements: Movement[] = [];
   private sub: Subscription = new Subscription();
@@ -67,12 +59,15 @@ export class Tab2Page implements OnInit, OnDestroy {
     });
   }
 
-  ngOnInit() {
+  async ngOnInit() {
     this.sub.add(
       this.transactionService.movements$.subscribe(movs => {
         this.movements = movs;
       })
     );
+
+    const categories = await this.transactionService.getCategories();
+    this.categories = categories.map((cat: any) => cat.name);
   }
 
   ngOnDestroy() {

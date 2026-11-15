@@ -1,3 +1,4 @@
+import { provideZoneChangeDetection } from '@angular/core';
 import { bootstrapApplication } from '@angular/platform-browser';
 import { provideHttpClient } from '@angular/common/http';
 import { RouteReuseStrategy, provideRouter, withComponentInputBinding, withPreloading, PreloadAllModules } from '@angular/router';
@@ -8,6 +9,7 @@ import { AppComponent } from './app/app.component';
 
 bootstrapApplication(AppComponent, {
   providers: [
+    provideZoneChangeDetection({ eventCoalescing: true }),
     { provide: RouteReuseStrategy, useClass: IonicRouteStrategy },
     provideIonicAngular(),
     provideHttpClient(),

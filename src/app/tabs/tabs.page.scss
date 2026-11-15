@@ -21,3 +21,20 @@
     }
   }
 }
+
+/* Hack para Angular 22 - Forzar visibilidad
+   Requiere :host ::ng-deep porque los .ion-page los crea IonRouterOutlet
+   en su propia vista y no llevan el _ngcontent de TabsPage. */
+:host ::ng-deep ion-tabs ion-router-outlet > .ion-page {
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 1 !important;
+  height: 100% !important;
+}
+
+:host ::ng-deep ion-tabs ion-router-outlet > .ion-page-hidden {
+  display: none !important;
+}

@@ -108,7 +108,7 @@ export class BudgetsPage implements OnInit, OnDestroy, ViewWillEnter {
   async cargarCategorias(): Promise<void> {
     try {
       const res = await firstValueFrom(this.api.getCategories());
-      this.categoriasDisponibles = res.data ?? [];
+      this.categoriasDisponibles = (res.data ?? []) as any;
     } catch (error) {
       console.error('Error al obtener categorias:', error);
     } finally {

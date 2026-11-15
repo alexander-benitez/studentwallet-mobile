@@ -45,8 +45,8 @@ export interface BudgetCategory {
   id: number;
   name: string;
   type?: string;
-  icon?: string;
-  color?: string;
+  icon?: string | null;
+  color?: string | null;
 }
 
 export interface Budget {
@@ -99,6 +99,26 @@ export class ApiService {
   getBudgets(): Observable<ApiResponse<Budget[]>> {
     return this.http.get<ApiResponse<Budget[]>>(
       `${this.apiUrl}/budgets`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  createBudget(data: {
+    category_id: number;
+    amount: number;
+    month: number;
+    year: number;
+  }): Observable<ApiResponse<Budget>> {
+    return this.http.post<ApiResponse<Budget>>(
+      `${this.apiUrl}/budgets`,
+      data,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  deleteBudget(id: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(
+      `${this.apiUrl}/budgets/${id}`,
       { headers: this.getHeaders() }
     );
   }

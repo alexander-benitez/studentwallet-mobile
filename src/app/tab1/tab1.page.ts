@@ -150,12 +150,12 @@ export class Tab1Page implements OnInit, OnDestroy, ViewWillEnter {
 
   private updateBudget(): void {
     const now = new Date();
-    const budgets = this.transactionService.budgetsValue.filter(
+    const budgets = (this.transactionService.budgetsValue as any[]).filter(
       budget => budget.year === now.getFullYear() && budget.month === now.getMonth() + 1
     );
 
-    const limit = budgets.reduce((sum, budget) => sum + Number(budget.amount || 0), 0);
-    const spent = budgets.reduce((sum, budget) => sum + Number(budget.spent || 0), 0);
+    const limit = budgets.reduce((sum: number, budget: any) => sum + Number(budget.amount || 0), 0);
+    const spent = budgets.reduce((sum: number, budget: any) => sum + Number(budget.spent || 0), 0);
 
     this.budgetTotal = limit;
     this.budgetUsed = spent;

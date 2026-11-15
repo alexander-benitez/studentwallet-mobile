@@ -48,15 +48,15 @@ import { TransactionService, Movement } from '../services/transaction';
   providers: [ModalController],
 })
 export class Tab1Page implements OnInit, OnDestroy {
-  userName: string = 'Karla';
-  availableBalance: number = 880.00;
-  monthlyIncome: number = 1200;
-  monthlyExpense: number = 320;
-  savings: number = 880;
+  usuario: string = 'Estudiante';
+  availableBalance: number = 0;
+  monthlyIncome: number = 0;
+  monthlyExpense: number = 0;
+  savings: number = 0;
 
-  budgetUsed: number = 320;
+  budgetUsed: number = 0;
   budgetTotal: number = 500;
-  budgetPercent: number = 0.64;
+  budgetPercent: number = 0;
 
   recentMovements: Movement[] = [];
   private sub: Subscription = new Subscription();
@@ -83,6 +83,13 @@ export class Tab1Page implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
+    try {
+      const user = JSON.parse(localStorage.getItem('user_info') || '{}');
+      this.usuario = user.name || 'Estudiante';
+    } catch {
+      this.usuario = 'Estudiante';
+    }
+
     this.sub.add(
       this.transactionService.balance$.subscribe(bal => {
         this.availableBalance = bal;

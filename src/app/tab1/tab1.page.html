@@ -103,20 +103,29 @@
         <a class="see-all-link" routerLink="/tabs/tab3">Ver todas</a>
       </div>
 
-      <div class="goal-card">
-        <div class="goal-header">
-          <div class="goal-title-wrap">
-            <span class="goal-icon">💻</span>
-            <span class="goal-name">Comprar una laptop</span>
+      @if (goals.length > 0) {
+        <div class="goal-card">
+          <div class="goal-header">
+            <div class="goal-title-wrap">
+              <span class="goal-icon">{{ goals[0].icon || '🎯' }}</span>
+              <span class="goal-name">{{ goals[0].title }}</span>
+            </div>
+            <span class="goal-percent">{{ (goals[0].targetAmount > 0 ? (goals[0].currentAmount / goals[0].targetAmount) * 100 : 0) | number:'1.0-0' }}%</span>
           </div>
-          <span class="goal-percent">60%</span>
+          <ion-progress-bar [value]="goals[0].targetAmount > 0 ? goals[0].currentAmount / goals[0].targetAmount : 0" class="goal-progress"></ion-progress-bar>
+          <div class="goal-footer">
+            <span class="saved-amount">${{ goals[0].currentAmount | number:'1.0-0' }} / ${{ goals[0].targetAmount | number:'1.0-0' }}</span>
+            <span class="remaining-amount">
+              {{ goals[0].currentAmount >= goals[0].targetAmount ? '¡Alcanzada!' : 'Faltan $' + ((goals[0].targetAmount - goals[0].currentAmount) | number:'1.0-0') }}
+            </span>
+          </div>
         </div>
-        <ion-progress-bar [value]="0.6" class="goal-progress"></ion-progress-bar>
-        <div class="goal-footer">
-          <span class="saved-amount">$420 / $700</span>
-          <span class="remaining-amount">Faltan $280</span>
+      } @else {
+        <div class="goal-card empty-goal-card">
+          <h3>No tienes metas registradas</h3>
+          <p>Crea una meta para empezar a ahorrar.</p>
         </div>
-      </div>
+      }
     </div>
 
     <!-- Sección Consejos para ti -->
@@ -126,14 +135,14 @@
       </div>
       <div class="tip-texts">
         <h4>Consejos para ti</h4>
-        <p>Mira qué puedes mejorar este mes</p>
+        <p>{{ recommendation || 'Registra más transacciones para recibir consejos personalizados.' }}</p>
       </div>
     </div>
   </div>
 
   <!-- Botón Flotante Morado (+) -->
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fab-plus">
-    <ion-fab-button (click)="openMovementModal('gasto')">
+    <ion-fab-button (click)="openMovementModal('ingreso')">
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>
   </ion-fab>

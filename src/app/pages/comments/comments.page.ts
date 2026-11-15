@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
@@ -16,7 +16,8 @@ import {
   IonList,
   IonSpinner,
   IonToast,
-  IonBadge
+  IonBadge,
+  ViewWillEnter
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -54,7 +55,7 @@ import { ApiService, Suggestion } from '../../services/api.service';
     IonBadge
   ]
 })
-export class CommentsPage implements OnInit {
+export class CommentsPage implements OnInit, OnDestroy, ViewWillEnter {
   readonly categories = ['Mejora', 'Error', 'Nueva función', 'Opinión'];
 
   category = '';
@@ -70,6 +71,8 @@ export class CommentsPage implements OnInit {
   toastColor = 'success';
 
   private api = inject(ApiService);
+  private cdr = inject(ChangeDetectorRef);
+  private destroyed = false;
 
   constructor() {
     addIcons({
@@ -86,16 +89,28 @@ export class CommentsPage implements OnInit {
     this.loadSuggestions();
   }
 
+  ionViewWillEnter(): void {
+    if (!this.loading) {
+      this.loadSuggestions();
+    }
+  }
+
+  ngOnDestroy() {
+    this.destroyed = true;
+  }
+
   loadSuggestions() {
     this.loading = true;
     this.api.getSuggestions().subscribe({
       next: (res) => {
         this.suggestions = res.data ?? [];
         this.loading = false;
+        this.refreshView();
       },
       error: () => {
         this.loading = false;
         this.showToast('No se pudieron cargar tus comentarios.', 'danger');
+        this.refreshView();
       }
     });
   }
@@ -126,11 +141,13 @@ export class CommentsPage implements OnInit {
         this.message = '';
         this.rating = 0;
         this.showToast('¡Comentario enviado con éxito!', 'success');
+        this.refreshView();
         this.loadSuggestions();
       },
       error: () => {
         this.sending = false;
         this.showToast('Ocurrió un error al enviar tu comentario.', 'danger');
+        this.refreshView();
       }
     });
   }
@@ -174,5 +191,11 @@ export class CommentsPage implements OnInit {
     this.toastMessage = message;
     this.toastColor = color;
     this.toastOpen = true;
+  }
+
+  private refreshView(): void {
+    if (!this.destroyed) {
+      this.cdr.detectChanges();
+    }
   }
 }

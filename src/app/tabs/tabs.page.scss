@@ -4,11 +4,20 @@
   border-top: 1px solid #141c2e;
   height: 64px;
   padding-bottom: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
   ion-tab-button {
     --color: #64748b;
     --color-selected: #2b66f6;
     background: transparent;
+    flex: 0 0 88px;
+    min-width: 88px;
+    width: 88px;
 
     ion-icon {
       font-size: 1.3rem;

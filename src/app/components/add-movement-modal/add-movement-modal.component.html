@@ -32,16 +32,29 @@
   <div class="section-group">
     <label class="section-label">Categoría</label>
     <div class="chips-container">
-      <button 
-        type="button"
-        class="chip-item" 
-        *ngFor="let cat of currentCategories" 
-        [class.selected]="selectedCategoryId === cat.id" 
-        (click)="selectCategory(cat.id)">
-        <span class="chip-emoji">{{ cat.icon }}</span>
-        <span>{{ cat.name }}</span>
-      </button>
+      @for (cat of currentCategories; track cat.id) {
+        <button
+          type="button"
+          class="chip-item"
+          [class.selected]="selectedCategoryId === cat.id"
+          (click)="selectCategory(cat.id)">
+          <span class="chip-emoji">
+            <ion-icon
+              [name]="cat.icon"
+              [style.color]="selectedCategoryId === cat.id ? '#ffffff' : cat.color"
+            ></ion-icon>
+          </span>
+          <span>{{ cat.name }}</span>
+        </button>
+      }
     </div>
+
+    @if (currentCategories.length === 0) {
+      <button type="button" class="btn-manage-categories" (click)="manageCategories()">
+        <ion-icon name="settings-outline"></ion-icon>
+        Administrar mis categorías
+      </button>
+    }
   </div>
 
   <!-- Fecha -->
@@ -49,6 +62,19 @@
     <label class="section-label">Fecha</label>
     <div class="input-card">
       <input type="date" [(ngModel)]="date" class="date-input" />
+    </div>
+  </div>
+
+  <!-- Concepto -->
+  <div class="section-group">
+    <label class="section-label">Concepto</label>
+    <div class="input-card">
+      <input
+        type="text"
+        [(ngModel)]="concepto"
+        placeholder="Ej. Pago de mensualidad"
+        class="text-input"
+      />
     </div>
   </div>
 

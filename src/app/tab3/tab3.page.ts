@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { IonContent, IonProgressBar, IonFab, IonFabButton, IonIcon, ViewWillEnter } from '@ionic/angular';
@@ -21,10 +21,10 @@ export class Tab3Page implements OnInit, OnDestroy, ViewWillEnter {
   newGoalTitle: string = '';
   newGoalTarget: number | null = null;
 
-  constructor(
-    private transactionService: TransactionService,
-    private cdr: ChangeDetectorRef
-  ) {
+  private transactionService = inject(TransactionService);
+  private cdr = inject(ChangeDetectorRef);
+
+  constructor() {
     addIcons({ addOutline: add });
   }
 

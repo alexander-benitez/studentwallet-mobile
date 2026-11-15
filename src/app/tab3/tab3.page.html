@@ -6,29 +6,27 @@
 
     <!-- Lista de Metas -->
     <div class="goals-list">
-      <div 
-        class="goal-card" 
-        *ngFor="let goal of goals"
-        (click)="openContributionModal(goal)"
-      >
-        <div class="goal-header">
-          <div class="title-box">
-            <span class="icon">{{ goal.icon || '🎯' }}</span>
-            <span class="title">{{ goal.title }}</span>
+      @for (goal of goals; track goal.id) {
+        <div class="goal-card" (click)="openContributionModal(goal)">
+          <div class="goal-header">
+            <div class="title-box">
+              <span class="icon">{{ goal.icon || '🎯' }}</span>
+              <span class="title">{{ goal.title }}</span>
+            </div>
+            <span class="percentage">{{ getPercentLabel(goal) }}%</span>
           </div>
-          <span class="percentage">{{ getPercentLabel(goal) }}%</span>
-        </div>
 
-        <!-- Barra de progreso verde -->
-        <ion-progress-bar [value]="getPercent(goal)" class="custom-progress"></ion-progress-bar>
+          <!-- Barra de progreso verde -->
+          <ion-progress-bar [value]="getPercent(goal)" class="custom-progress"></ion-progress-bar>
 
-        <div class="goal-footer">
-          <span class="amounts">${{ goal.currentAmount | number:'1.0-0' }} / ${{ goal.targetAmount | number:'1.0-0' }}</span>
-          <span class="remaining">
-            {{ goal.currentAmount >= goal.targetAmount ? '¡Alcanzada!' : 'Faltan $' + ((goal.targetAmount - goal.currentAmount) | number:'1.0-0') }}
-          </span>
+          <div class="goal-footer">
+            <span class="amounts">${{ goal.currentAmount | number:'1.0-0' }} / ${{ goal.targetAmount | number:'1.0-0' }}</span>
+            <span class="remaining">
+              {{ goal.currentAmount >= goal.targetAmount ? '¡Alcanzada!' : 'Faltan $' + ((goal.targetAmount - goal.currentAmount) | number:'1.0-0') }}
+            </span>
+          </div>
         </div>
-      </div>
+      }
     </div>
 
     <!-- Botón desplegable azul + Nueva meta -->
@@ -37,35 +35,37 @@
     </button>
 
     <!-- Tarjeta desplegable "Nueva meta 🎯" -->
-    <div class="new-goal-card" *ngIf="showNewGoalForm">
-      <h2>Nueva meta 🎯</h2>
+    @if (showNewGoalForm) {
+      <div class="new-goal-card">
+        <h2>Nueva meta 🎯</h2>
 
-      <div class="form-group">
-        <label>Nombre</label>
-        <input 
-          type="text" 
-          placeholder="Ej. Comprar una laptop" 
-          [(ngModel)]="newGoalTitle"
-        />
+        <div class="form-group">
+          <label>Nombre</label>
+          <input
+            type="text"
+            placeholder="Ej. Comprar una laptop"
+            [(ngModel)]="newGoalTitle"
+          />
+        </div>
+
+        <div class="form-group">
+          <label>Monto a ahorrar</label>
+          <input
+            type="number"
+            placeholder="$0.00"
+            [(ngModel)]="newGoalTarget"
+          />
+        </div>
+
+        <button type="button" class="btn-create-goal" (click)="createGoal()">
+          Crear meta
+        </button>
+
+        <button type="button" class="btn-cancel-goal" (click)="cancelNewGoal()">
+          Cancelar
+        </button>
       </div>
-
-      <div class="form-group">
-        <label>Monto a ahorrar</label>
-        <input 
-          type="number" 
-          placeholder="$0.00" 
-          [(ngModel)]="newGoalTarget"
-        />
-      </div>
-
-      <button type="button" class="btn-create-goal" (click)="createGoal()">
-        Crear meta
-      </button>
-
-      <button type="button" class="btn-cancel-goal" (click)="cancelNewGoal()">
-        Cancelar
-      </button>
-    </div>
+    }
 
   </div>
 

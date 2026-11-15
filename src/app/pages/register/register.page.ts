@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -44,7 +44,9 @@ export class RegisterPage {
   showConfirmPassword: boolean = false;
   isLoading: boolean = false;
 
-  constructor(private router: Router) {
+  private router = inject(Router);
+
+  constructor() {
     addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
   }
 

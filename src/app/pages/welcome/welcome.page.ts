@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectorRef, Component, NgZone } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -14,11 +14,11 @@ import { cardOutline, trendingUpOutline } from 'ionicons/icons';
   imports: [IonContent, IonButton, IonIcon, CommonModule, FormsModule],
 })
 export class WelcomePage implements AfterViewInit, ViewWillEnter {
-  constructor(
-    private cdr: ChangeDetectorRef,
-    private ngZone: NgZone,
-    private router: Router
-  ) {
+  private cdr = inject(ChangeDetectorRef);
+  private ngZone = inject(NgZone);
+  private router = inject(Router);
+
+  constructor() {
     addIcons({ cardOutline, trendingUpOutline });
   }
 

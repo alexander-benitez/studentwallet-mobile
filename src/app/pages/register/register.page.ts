@@ -62,6 +62,11 @@ export class RegisterPage {
       return;
     }
 
+    if (!this.email.trim().toLowerCase().endsWith('@gmail.com')) {
+      alert('El correo debe terminar en @gmail.com.');
+      return;
+    }
+
     if (this.password.length < 6) {
       alert('La contraseña debe tener al menos 6 caracteres.');
       return;

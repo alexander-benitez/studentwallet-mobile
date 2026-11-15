@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonProgressBar, IonFab, IonFabButton, IonIcon } from '@ionic/angular';
+import { IonContent, IonProgressBar, IonFab, IonFabButton, IonIcon, ViewWillEnter } from '@ionic/angular';
 import { add } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { Subscription } from 'rxjs';
@@ -12,39 +12,36 @@ import { TransactionService, Goal } from '../services/transaction';
   templateUrl: 'tab3.page.html',
   styleUrls: ['tab3.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule, 
-    FormsModule, 
-    IonContent, 
-    IonProgressBar, 
-    IonFab, 
-    IonFabButton, 
-    IonIcon
-  ]
+  imports: [CommonModule, FormsModule, IonContent, IonProgressBar, IonFab, IonFabButton, IonIcon]
 })
-export class Tab3Page implements OnInit, OnDestroy {
+export class Tab3Page implements OnInit, OnDestroy, ViewWillEnter {
   goals: Goal[] = [];
   private sub!: Subscription;
-
   showNewGoalForm = false;
   newGoalTitle: string = '';
   newGoalTarget: number | null = null;
 
-  constructor(private transactionService: TransactionService) {
-    // Registramos el icono explícitamente para Ionic Standalone
+  constructor(
+    private transactionService: TransactionService,
+    private cdr: ChangeDetectorRef
+  ) {
     addIcons({ addOutline: add });
   }
 
   ngOnInit() {
     this.sub = this.transactionService.goals$.subscribe(data => {
       this.goals = data;
+      this.cdr.detectChanges(); // Forzamos la actualización de la vista
     });
   }
 
+  async ionViewWillEnter() {
+    await this.transactionService.loadGoalsFromApi();
+    this.cdr.detectChanges(); // Forzamos actualización al entrar
+  }
+
   ngOnDestroy() {
-    if (this.sub) {
-      this.sub.unsubscribe();
-    }
+    if (this.sub) this.sub.unsubscribe();
   }
 
   getPercent(goal: Goal): number {
@@ -56,9 +53,7 @@ export class Tab3Page implements OnInit, OnDestroy {
     return Math.round(this.getPercent(goal) * 100);
   }
 
-  toggleNewGoalForm() {
-    this.showNewGoalForm = !this.showNewGoalForm;
-  }
+  toggleNewGoalForm() { this.showNewGoalForm = !this.showNewGoalForm; }
 
   cancelNewGoal() {
     this.showNewGoalForm = false;
@@ -66,29 +61,20 @@ export class Tab3Page implements OnInit, OnDestroy {
     this.newGoalTarget = null;
   }
 
-  createGoal() {
-    if (!this.newGoalTitle.trim() || !this.newGoalTarget || this.newGoalTarget <= 0) {
-      return;
-    }
-
-    const newGoal: Goal = {
-      id: Date.now(),
-      title: this.newGoalTitle.trim(),
-      targetAmount: this.newGoalTarget,
-      currentAmount: 0,
-      icon: '🎯'
-    };
-
-    this.transactionService.addGoal(newGoal);
-    this.cancelNewGoal();
+  async createGoal() {
+    if (!this.newGoalTitle.trim() || !this.newGoalTarget || this.newGoalTarget <= 0) return;
+    const newGoal: Goal = { id: 0, title: this.newGoalTitle.trim(), targetAmount: Number(this.newGoalTarget), currentAmount: 0, icon: '🎯' };
+    const success = await this.transactionService.addGoal(newGoal);
+    if (success) this.cancelNewGoal();
   }
 
-  openContributionModal(goal: Goal) {
+  async openContributionModal(goal: Goal) {
     const input = prompt(`Abonar a "${goal.title}"\nIngresa el monto a abonar ($):`, '10');
     if (input !== null) {
       const amount = parseFloat(input);
       if (!isNaN(amount) && amount > 0) {
-        this.transactionService.addContribution(goal.id, amount);
+        await this.transactionService.addContribution(goal.id, amount);
+        this.cdr.detectChanges(); // Forzamos actualización después del aporte
       }
     }
   }

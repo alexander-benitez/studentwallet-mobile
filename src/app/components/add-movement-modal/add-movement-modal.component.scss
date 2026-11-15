@@ -102,7 +102,13 @@
     transition: all 0.2s ease;
 
     .chip-emoji {
+      display: inline-flex;
+      align-items: center;
       font-size: 1rem;
+
+      ion-icon {
+        font-size: 1rem;
+      }
     }
 
     &.selected {
@@ -159,6 +165,33 @@
 
   &.btn-income {
     background: #10b981;
+  }
+}
+
+.btn-manage-categories {
+  width: 100%;
+  margin-top: 12px;
+  background: #151e33;
+  border: 1px dashed #2563eb;
+  border-radius: 12px;
+  color: #60a5fa;
+  height: 46px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  ion-icon {
+    font-size: 1.05rem;
+  }
+
+  &:active {
+    background: #1d4ed8;
+    color: #ffffff;
   }
 }
 

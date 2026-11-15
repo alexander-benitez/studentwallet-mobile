@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
@@ -6,7 +6,8 @@ import {
   IonIcon, 
   IonFab, 
   IonFabButton, 
-  ModalController 
+  ModalController,
+  ViewWillEnter
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { 
@@ -32,7 +33,7 @@ import { TransactionService, Movement } from '../services/transaction';
   imports: [IonContent, IonIcon, IonFab, IonFabButton, CommonModule, FormsModule, DecimalPipe],
   providers: [ModalController],
 })
-export class Tab2Page implements OnInit, OnDestroy {
+export class Tab2Page implements OnInit, OnDestroy, ViewWillEnter {
   typeFilter: 'all' | 'income' | 'expense' = 'all';
   selectedCategory: string = 'all';
   selectedDate: string = 'all';
@@ -41,11 +42,11 @@ export class Tab2Page implements OnInit, OnDestroy {
 
   movements: Movement[] = [];
   private sub: Subscription = new Subscription();
+  private modalCtrl = inject(ModalController);
+  private transactionService = inject(TransactionService);
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(
-    private modalCtrl: ModalController,
-    private transactionService: TransactionService
-  ) {
+  constructor() {
     addIcons({
       chevronDownOutline,
       addOutline,
@@ -63,11 +64,17 @@ export class Tab2Page implements OnInit, OnDestroy {
     this.sub.add(
       this.transactionService.movements$.subscribe(movs => {
         this.movements = movs;
+        this.cdr.detectChanges();
       })
     );
 
     const categories = await this.transactionService.getCategories();
     this.categories = categories.map((cat: any) => cat.name);
+    this.cdr.detectChanges();
+  }
+
+  ionViewWillEnter(): void {
+    void this.transactionService.refreshData();
   }
 
   ngOnDestroy() {

@@ -14,7 +14,57 @@
       <p>Revisa cuánto has gastado frente al presupuesto de cada categoría.</p>
     </div>
 
-    @if (!loading && budgets.length > 0) {
+    <div class="add-budget">
+      <ion-button expand="block" color="primary" (click)="abrirFormulario()">
+        <ion-icon slot="start" name="add-outline"></ion-icon>
+        Nuevo presupuesto
+      </ion-button>
+    </div>
+
+    @if (errorMessage) {
+      <div class="budget-error" role="alert">
+        <ion-icon name="alert-circle-outline"></ion-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+    }
+
+    @if (mostrarFormulario) {
+      <div class="budget-form">
+        <p class="field-label">Categoría</p>
+        <select [(ngModel)]="nuevaCategoriaId" name="nuevaCategoriaId" class="budget-select">
+          <option [value]="null" disabled>Selecciona una categoría</option>
+          @for (cat of categoriasDisponibles; track cat.id) {
+            <option [value]="cat.id">{{ cat.name }}</option>
+          }
+        </select>
+
+        <p class="field-label">Límite</p>
+        <input
+          type="number"
+          [(ngModel)]="nuevoLimite"
+          name="nuevoLimite"
+          min="0.01"
+          step="0.01"
+          placeholder="0.00"
+        />
+
+        <p class="field-label">Año</p>
+        <input type="number" [(ngModel)]="nuevoAnio" name="nuevoAnio" min="2000" max="2100" />
+
+        <p class="field-label">Mes</p>
+        <input type="number" [(ngModel)]="nuevoMes" name="nuevoMes" min="1" max="12" />
+
+        <ion-button expand="block" color="primary" (click)="guardarPresupuesto()" [disabled]="guardando">
+          <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+          Guardar presupuesto
+        </ion-button>
+        <ion-button expand="block" color="medium" (click)="mostrarFormulario = false">
+          Cancelar
+        </ion-button>
+      </div>
+    }
+
+    @if (!loading && currentBudgets.length > 0) {
       <div class="summary-card">
         <div class="summary-header">
           <div>
@@ -35,16 +85,16 @@
       </div>
     }
 
-    @if (!loading && budgets.length === 0) {
+    @if (!loading && currentBudgets.length === 0) {
       <div class="empty-state">
         <ion-icon name="wallet-outline"></ion-icon>
         <p>Aún no tienes presupuestos registrados.</p>
       </div>
     }
 
-    @if (!loading && budgets.length > 0) {
+    @if (!loading && currentBudgets.length > 0) {
       <div class="budget-list">
-        @for (budget of budgets; track budget.id) {
+        @for (budget of currentBudgets; track budget.id) {
           <div
             class="budget-card"
             [ngClass]="'alert-' + budget.alert">
@@ -66,6 +116,10 @@
                 <ion-icon [name]="getAlertIcon(budget.alert)"></ion-icon>
                 <span>{{ getAlertLabel(budget.alert) }}</span>
               </div>
+
+              <button class="budget-delete" (click)="eliminarPresupuesto(budget.id)">
+                Eliminar
+              </button>
             </div>
 
             <div class="budget-amounts">

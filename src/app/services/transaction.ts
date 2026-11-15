@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface Movement {
@@ -12,6 +12,7 @@ export interface Movement {
   icon: string;
   iconBg: string;
   period: 'week' | 'month';
+  date?: string;
 }
 
 export interface Goal {
@@ -35,6 +36,8 @@ export class TransactionService {
 
   private goalsSubject = new BehaviorSubject<Goal[]>([]);
   goals$ = this.goalsSubject.asObservable();
+
+  recommendations$ = of([] as { message: string }[]);
 
   constructor() {
     this.refreshData();

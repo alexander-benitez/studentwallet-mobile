@@ -1,6 +1,6 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonContent, IonIcon, IonFab, IonFabButton, ModalController } from '@ionic/angular';
+import { IonContent, IonIcon, IonFab, IonFabButton, ModalController, ViewWillEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { barChartOutline, add, addOutline, fastFoodOutline, busOutline, bookOutline, gameControllerOutline, homeOutline } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
@@ -30,7 +30,7 @@ interface MonthlyStat {
   standalone: true,
   imports: [CommonModule, IonContent, IonIcon, IonFab, IonFabButton]
 })
-export class Tab4Page implements OnInit, OnDestroy {
+export class Tab4Page implements OnInit, OnDestroy, ViewWillEnter {
   movements: Movement[] = [];
   totalIncome = 0;
   totalExpense = 0;
@@ -42,12 +42,11 @@ export class Tab4Page implements OnInit, OnDestroy {
   Math = Math;
 
   private sub!: Subscription;
+  private transactionService = inject(TransactionService);
+  private modalController = inject(ModalController);
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(
-    private transactionService: TransactionService,
-    private modalController: ModalController
-  ) {
-    // Añadimos addOutline para que coincida con el icono
+  constructor() {
     addIcons({ barChartOutline, add, addOutline, fastFoodOutline, busOutline, bookOutline, gameControllerOutline, homeOutline });
   }
 
@@ -55,7 +54,12 @@ export class Tab4Page implements OnInit, OnDestroy {
     this.sub = this.transactionService.movements$.subscribe(data => {
       this.movements = data;
       this.calculateDynamicStats();
+      this.cdr.detectChanges();
     });
+  }
+
+  ionViewWillEnter(): void {
+    void this.transactionService.refreshData();
   }
 
   ngOnDestroy() {
@@ -65,92 +69,101 @@ export class Tab4Page implements OnInit, OnDestroy {
   }
 
   calculateDynamicStats() {
-    this.totalIncome = this.movements
+    const currentMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+    const monthMovements = this.movements.filter(m => (m.date ?? '').startsWith(currentMonthKey));
+
+    this.totalIncome = monthMovements
       .filter(m => !m.isExpense)
       .reduce((sum, m) => sum + Math.abs(m.amount), 0);
 
-    this.totalExpense = this.movements
+    this.totalExpense = monthMovements
       .filter(m => m.isExpense)
       .reduce((sum, m) => sum + Math.abs(m.amount), 0);
 
     this.totalSavings = this.totalIncome - this.totalExpense;
 
-    const expenses = this.movements.filter(m => m.isExpense);
-    const map = new Map<string, number>();
-    
+    const expenses = monthMovements.filter(m => m.isExpense);
+    const categoryMap = new Map<string, { amount: number; icon: string; iconBg: string }>();
+
     expenses.forEach(m => {
-      const cat = m.category || 'Otros';
-      const current = map.get(cat) || 0;
-      map.set(cat, current + Math.abs(m.amount));
+      const categoryName = m.category || 'Sin categoría';
+      const current = categoryMap.get(categoryName) ?? { amount: 0, icon: m.icon || 'cash-outline', iconBg: m.iconBg };
+      current.amount += Math.abs(m.amount);
+      categoryMap.set(categoryName, current);
     });
 
-    const categoryIcons: { [key: string]: { color: string, icon: string } } = {
-      'Alimentación': { color: '#3b82f6', icon: 'fast-food-outline' },
-      'Transporte': { color: '#8b5cf6', icon: 'bus-outline' },
-      'Estudios': { color: '#10b981', icon: 'book-outline' },
-      'Entretenimiento': { color: '#f59e0b', icon: 'game-controller-outline' },
-      'Otros': { color: '#64748b', icon: 'home-outline' }
-    };
-
-    this.categoryStats = [];
-    map.forEach((amount, name) => {
-      const percentage = this.totalExpense > 0 ? (amount / this.totalExpense) : 0;
-      const meta = categoryIcons[name] || { color: '#64748b', icon: 'home-outline' };
-      this.categoryStats.push({
+    this.categoryStats = Array.from(categoryMap.entries())
+      .map(([name, value]) => ({
         name,
-        amount,
-        percentage,
-        color: meta.color,
-        icon: meta.icon
+        amount: value.amount,
+        percentage: this.totalExpense > 0 ? (value.amount / this.totalExpense) * 100 : 0,
+        color: value.iconBg || '#64748b',
+        icon: value.icon || 'cash-outline',
+      }))
+      .sort((a, b) => b.amount - a.amount);
+
+    const monthlyAggregates = new Map<string, { income: number; expense: number }>();
+    this.movements.forEach(m => {
+      const key = (m.date ?? '').slice(0, 7);
+      if (!key) return;
+
+      const current = monthlyAggregates.get(key) ?? { income: 0, expense: 0 };
+      if (m.isExpense) {
+        current.expense += Math.abs(m.amount);
+      } else {
+        current.income += Math.abs(m.amount);
+      }
+      monthlyAggregates.set(key, current);
+    });
+
+    const monthlyStats = Array.from(monthlyAggregates.entries())
+      .sort((a, b) => b[0].localeCompare(a[0]))
+      .map(([key, totals]) => {
+        const maxValue = Math.max(totals.income, totals.expense, 1);
+        const incomeHeight = Math.min(90, Math.round((totals.income / maxValue) * 90));
+        const expenseHeight = Math.min(90, Math.round((totals.expense / maxValue) * 90));
+
+        return {
+          monthName: this.getMonthName(Number(key.slice(5, 7))),
+          income: totals.income,
+          expense: totals.expense,
+          maxHeightIncome: Math.max(15, incomeHeight),
+          maxHeightExpense: Math.max(15, expenseHeight)
+        };
       });
+
+    this.monthlyStats = monthlyStats;
+
+    let cumulativeSavings = 0;
+    let savingsPath = '';
+    this.monthlyStats.forEach((stat, index) => {
+      const savings = stat.income - stat.expense;
+      cumulativeSavings += savings;
+      const x = 15 + index * 68;
+      const y = Math.max(15, Math.min(85, 80 - (cumulativeSavings / 50)));
+      savingsPath = index === 0 ? `M ${x} ${y}` : `${savingsPath} L ${x} ${y}`;
     });
 
-    const months = ['Jun', 'Jul', 'Ago', 'Sep', 'Oct'];
-    let runningSavings = 100;
-    const points: { x: number, y: number }[] = [];
+    this.savingsPoints = savingsPath;
+  }
 
-    this.monthlyStats = months.map((m, index) => {
-      const factor = 1 + (index * 0.15);
-      const inc = Math.round((this.totalIncome / 5) * factor);
-      const exp = Math.round((this.totalExpense / 5) * (1.2 - (index * 0.05)));
-      const net = inc - exp;
-      runningSavings += net;
-
-      const x = 15 + (index * 68);
-      const y = Math.max(15, Math.min(85, 80 - (runningSavings / 50)));
-      points.push({ x, y });
-
-      const maxVal = Math.max(this.totalIncome, this.totalExpense, 1);
-      const hInc = Math.min(90, Math.round((inc / maxVal) * 90));
-      const hExp = Math.min(90, Math.round((exp / maxVal) * 90));
-
-      return {
-        monthName: m,
-        income: inc,
-        expense: exp,
-        maxHeightIncome: Math.max(15, hInc),
-        maxHeightExpense: Math.max(15, hExp)
-      };
-    });
-
-    this.savingsPoints = points.reduce((acc, p, idx) => {
-      return idx === 0 ? `M ${p.x} ${p.y}` : `${acc} L ${p.x} ${p.y}`;
-    }, '');
+  getMonthName(month: number): string {
+    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+    return months[(month - 1) % 12] ?? '';
   }
 
   // Método idéntico al de Tab1 para abrir el modal estilizado con el selector Ingreso/Gasto
   async openAddMovement() {
     const modal = await this.modalController.create({
       component: AddMovementModalComponent,
-      componentProps: { type: 'gasto' }
+      componentProps: { initialType: 'gasto' }
     });
-    
+
     await modal.present();
 
-    const { data } = await modal.onDidDismiss();
-    if (data) {
+    const { data, role } = await modal.onDidDismiss();
+    if (role === 'created' && data) {
       await this.transactionService.addMovement(data);
-      await this.transactionService.refreshData();
     }
   }
 }

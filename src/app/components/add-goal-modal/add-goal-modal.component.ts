@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ModalController } from '@ionic/angular';
@@ -13,8 +13,9 @@ import { ModalController } from '@ionic/angular';
 export class AddGoalModalComponent {
   goalName: string = '';
   targetAmount: number | null = null;
+  deadline: string = '';
 
-  constructor(private modalCtrl: ModalController) {}
+  private modalCtrl = inject(ModalController);
 
   cancel() {
     this.modalCtrl.dismiss(null, 'cancel');
@@ -32,9 +33,10 @@ export class AddGoalModalComponent {
 
     this.modalCtrl.dismiss(
       {
-        name: this.goalName,
+        title: this.goalName,
         target: this.targetAmount,
-        saved: 0
+        saved: 0,
+        deadline: this.deadline || undefined
       },
       'created'
     );

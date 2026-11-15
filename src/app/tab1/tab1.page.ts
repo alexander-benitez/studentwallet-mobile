@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { 
@@ -7,7 +7,8 @@ import {
   IonIcon, 
   IonFab, 
   IonFabButton, 
-  ModalController 
+  ModalController,
+  ViewWillEnter
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { 
@@ -28,7 +29,7 @@ import {
 import { Subscription } from 'rxjs';
 import { AddMovementModalComponent } from '../components/add-movement-modal/add-movement-modal.component';
 import { AddGoalModalComponent } from '../components/add-goal-modal/add-goal-modal.component';
-import { TransactionService, Movement } from '../services/transaction';
+import { TransactionService, Movement, Goal } from '../services/transaction';
 
 @Component({
   selector: 'app-tab1',
@@ -47,31 +48,35 @@ import { TransactionService, Movement } from '../services/transaction';
   ],
   providers: [ModalController],
 })
-export class Tab1Page implements OnInit, OnDestroy {
+export class Tab1Page implements OnInit, OnDestroy, ViewWillEnter {
   usuario: string = 'Estudiante';
   availableBalance: number = 0;
   monthlyIncome: number = 0;
   monthlyExpense: number = 0;
   savings: number = 0;
+  goals: Goal[] = [];
+  recommendation: string = '';
 
   budgetUsed: number = 0;
-  budgetTotal: number = 500;
+  budgetTotal: number = 0;
   budgetPercent: number = 0;
 
   recentMovements: Movement[] = [];
   private sub: Subscription = new Subscription();
+  private goalsSub: Subscription = new Subscription();
+  private recommendationsSub: Subscription = new Subscription();
+  private modalCtrl = inject(ModalController);
+  private transactionService = inject(TransactionService);
+  private cdr = inject(ChangeDetectorRef);
 
-  constructor(
-    private modalCtrl: ModalController,
-    private transactionService: TransactionService
-  ) {
-    addIcons({ 
-      arrowUpOutline, 
-      arrowDownOutline, 
-      addOutline, 
-      removeOutline, 
-      discOutline, 
-      fastFoodOutline, 
+  constructor() {
+    addIcons({
+      arrowUpOutline,
+      arrowDownOutline,
+      addOutline,
+      removeOutline,
+      discOutline,
+      fastFoodOutline,
       schoolOutline,
       cashOutline,
       busOutline,
@@ -93,7 +98,7 @@ export class Tab1Page implements OnInit, OnDestroy {
     this.sub.add(
       this.transactionService.balance$.subscribe(bal => {
         this.availableBalance = bal;
-        this.savings = bal;
+        this.cdr.detectChanges();
       })
     );
 
@@ -101,17 +106,35 @@ export class Tab1Page implements OnInit, OnDestroy {
       this.transactionService.movements$.subscribe(movs => {
         this.recentMovements = movs.slice(0, 3);
         this.recalculateTotals(movs);
+        this.cdr.detectChanges();
       })
     );
+
+    this.goalsSub = this.transactionService.goals$.subscribe(goals => {
+      this.goals = goals;
+      this.cdr.detectChanges();
+    });
+
+    this.recommendationsSub = this.transactionService.recommendations$.subscribe(recommendations => {
+      this.recommendation = recommendations?.[0]?.message ?? '';
+      this.cdr.detectChanges();
+    });
+  }
+
+  ionViewWillEnter(): void {
+    void this.transactionService.refreshData().then(() => this.updateBudget());
   }
 
   ngOnDestroy() {
     this.sub.unsubscribe();
+    this.goalsSub.unsubscribe();
+    this.recommendationsSub.unsubscribe();
   }
 
   private recalculateTotals(movs: Movement[]) {
     let inc = 0;
     let exp = 0;
+
     for (const m of movs) {
       if (m.isExpense) {
         exp += Math.abs(m.amount);
@@ -119,10 +142,24 @@ export class Tab1Page implements OnInit, OnDestroy {
         inc += m.amount;
       }
     }
+
     this.monthlyIncome = inc;
     this.monthlyExpense = exp;
-    this.budgetUsed = exp;
-    this.budgetPercent = Math.min(this.budgetUsed / this.budgetTotal, 1);
+    this.savings = inc - exp;
+  }
+
+  private updateBudget(): void {
+    const now = new Date();
+    const budgets = (this.transactionService.budgetsValue as any[]).filter(
+      budget => budget.year === now.getFullYear() && budget.month === now.getMonth() + 1
+    );
+
+    const limit = budgets.reduce((sum: number, budget: any) => sum + Number(budget.amount || 0), 0);
+    const spent = budgets.reduce((sum: number, budget: any) => sum + Number(budget.spent || 0), 0);
+
+    this.budgetTotal = limit;
+    this.budgetUsed = spent;
+    this.budgetPercent = limit > 0 ? Math.min(spent / limit, 1) : 0;
   }
 
   async openMovementModal(type: 'ingreso' | 'gasto' = 'gasto') {
@@ -155,7 +192,13 @@ export class Tab1Page implements OnInit, OnDestroy {
 
     const { data, role } = await modal.onDidDismiss();
     if (role === 'created' && data) {
-      alert(`¡Meta "${data.name}" creada con éxito!`);
+      await this.transactionService.addGoal({
+        id: Number(data.id ?? 0),
+        title: data.title,
+        targetAmount: Number(data.target),
+        currentAmount: Number(data.saved ?? 0),
+        deadline: data.deadline,
+      });
     }
   }
 }

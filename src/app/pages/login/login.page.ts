@@ -1,21 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, NgZone } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { 
-  IonContent, 
-  IonHeader, 
-  IonToolbar, 
-  IonButton, 
-  IonIcon, 
-  IonSpinner 
+import {
+  IonContent,
+  IonHeader,
+  IonToolbar,
+  IonButton,
+  IonIcon,
+  IonSpinner,
+  AlertController,
+  ToastController
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { 
-  chevronBackOutline, 
-  eyeOutline, 
-  eyeOffOutline 
-} from 'ionicons/icons';
+import { chevronBackOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-login',
@@ -23,14 +22,14 @@ import {
   styleUrls: ['./login.page.scss'],
   standalone: true,
   imports: [
-    IonContent, 
-    IonHeader, 
-    IonToolbar, 
-    IonButton, 
-    IonIcon, 
-    IonSpinner, 
-    CommonModule, 
-    FormsModule, 
+    IonContent,
+    IonHeader,
+    IonToolbar,
+    IonButton,
+    IonIcon,
+    IonSpinner,
+    CommonModule,
+    FormsModule,
     RouterLink
   ],
 })
@@ -40,7 +39,12 @@ export class LoginPage {
   showPassword: boolean = false;
   isLoading: boolean = false;
 
-  constructor(private router: Router) {
+  constructor(
+    private router: Router,
+    private alertController: AlertController,
+    private toastController: ToastController,
+    private ngZone: NgZone
+  ) {
     addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
   }
 
@@ -48,16 +52,15 @@ export class LoginPage {
     this.showPassword = !this.showPassword;
   }
 
-    async onLogin() {
+  async onLogin() {
     if (!this.email || !this.password) {
-      alert('Por favor ingresa tu correo y contraseña');
+      await this.showToast('Por favor ingresa tu correo y contraseña', 'danger');
       return;
     }
 
     this.isLoading = true;
-
     try {
-      const response = await fetch('http://127.0.0.1:8000/api/login', {
+      const response = await fetch(`${environment.apiUrl}/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -69,26 +72,111 @@ export class LoginPage {
         })
       });
 
-      const data = await response.json();
+      const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
         const token = data.data?.token || data.token;
         const user = data.data?.user || data.user;
 
-        localStorage.setItem('auth_token', token);
+        if (token) {
+          localStorage.setItem('auth_token', token);
+        }
         if (user) {
           localStorage.setItem('user_info', JSON.stringify(user));
         }
 
-        this.router.navigate(['/tabs/tab1'], { replaceUrl: true });
+        await this.ngZone.run(() => this.router.navigate(['/tabs/tab1'], { replaceUrl: true }));
       } else {
-        alert(data.message || 'Credenciales incorrectas');
+        await this.showToast(data.message || 'Credenciales incorrectas', 'danger');
       }
     } catch (error) {
       console.error('Error al conectar con la API:', error);
-      alert('No se pudo conectar con el servidor backend en el puerto 8000');
+      await this.showToast('No se pudo conectar con el servidor', 'danger');
     } finally {
       this.isLoading = false;
     }
+  }
+
+  async openForgotPassword() {
+    const alert = await this.alertController.create({
+      header: 'Recuperar contraseña',
+      message: 'Ingresa tu correo para recibir un código de recuperación.',
+      cssClass: 'forgot-password-alert',
+      backdropDismiss: true,
+      inputs: [
+        {
+          name: 'email',
+          type: 'email',
+          placeholder: 'tu@correo.com',
+          value: this.email?.trim() || ''
+        }
+      ],
+      buttons: [
+        { text: 'Cancelar', role: 'cancel' },
+        { text: 'Enviar', role: 'confirm' }
+      ]
+    });
+
+    await alert.present();
+    const result = await alert.onDidDismiss();
+    if (result.role === 'cancel' || result.role === 'backdrop') {
+      return;
+    }
+
+    const values = (result.data && (result.data.values ?? result.data)) || {};
+    const email = (values.email || '').toString().trim();
+    if (!email) {
+      await this.showToast('Debes ingresar un correo.', 'danger');
+      return;
+    }
+
+    await this.submitForgotPassword(email);
+  }
+
+  async submitForgotPassword(email: string) {
+    this.isLoading = true;
+    try {
+      const response = await fetch(`${environment.apiUrl}/forgot-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({ email })
+      });
+
+      const data = await response.json().catch(() => ({}));
+      const message =
+        data.message || 'Si el correo existe, se ha enviado un código de recuperación.';
+
+      if (response.ok) {
+        const navigated = await this.ngZone.run(() =>
+          this.router.navigate(['/reset-password'], { queryParams: { email } })
+        );
+        if (!navigated) {
+          await this.ngZone.run(() =>
+            this.router.navigateByUrl(`/reset-password?email=${encodeURIComponent(email)}`)
+          );
+        }
+        void this.showToast(message, 'success');
+      } else {
+        await this.showToast(data.message || 'No se pudo procesar la solicitud.', 'danger');
+      }
+    } catch (error) {
+      console.error('Error al solicitar recuperación:', error);
+      await this.showToast('No se pudo conectar con el servidor.', 'danger');
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  private async showToast(message: string, color: 'success' | 'danger') {
+    const toast = await this.toastController.create({
+      message,
+      duration: 3000,
+      color,
+      position: 'bottom'
+    });
+    await toast.present();
   }
 }

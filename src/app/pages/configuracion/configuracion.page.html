@@ -1,0 +1,129 @@
+<ion-header class="settings-header">
+  <ion-toolbar>
+    <ion-title>Configuración</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="settings-content">
+  <div class="settings-wrapper">
+
+    <!-- RESUMEN -->
+    <div class="summary-card">
+      <div class="summary-header">
+        <div class="summary-icon">
+          <ion-icon name="wallet-outline"></ion-icon>
+        </div>
+        <div>
+          <h2>StudentWallet</h2>
+          <p>Tu compañero financiero estudiantil</p>
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="summary-item">
+          <ion-icon name="swap-horizontal-outline"></ion-icon>
+          <strong>{{ movimientos }}</strong>
+          <span>Movimientos</span>
+        </div>
+
+        <div class="summary-item">
+          <ion-icon name="cash-outline"></ion-icon>
+          <strong>{{ presupuestos }}</strong>
+          <span>Presupuestos</span>
+        </div>
+
+        <div class="summary-item">
+          <ion-icon name="cash-outline"></ion-icon>
+          <strong>{{ metas }}</strong>
+          <span>Metas de ahorro</span>
+        </div>
+      </div>
+
+      <div class="summary-balance">
+        <label>Saldo actual</label>
+        <strong>{{ saldo | currency:'USD':'symbol':'1.2-2' }}</strong>
+      </div>
+    </div>
+
+    <!-- PREFERENCIAS -->
+    <div class="section-card">
+      <h3>Preferencias generales</h3>
+
+      <ion-list lines="none" class="preferences-list">
+        <ion-item>
+          <ion-icon name="notifications-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h4>Notificaciones</h4>
+            <p>Avisos dentro de la aplicación</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="preferences.notificaciones"
+            (ionChange)="togglePreference('notificaciones', $event)">
+          </ion-toggle>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon name="alert-circle-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h4>Alertas de presupuesto</h4>
+            <p>Avisos al acercarte a tus límites</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="preferences.alertasPresupuesto"
+            (ionChange)="togglePreference('alertasPresupuesto', $event)">
+          </ion-toggle>
+        </ion-item>
+
+        <ion-item>
+          <ion-icon name="bulb-outline" slot="start"></ion-icon>
+          <ion-label>
+            <h4>Consejos financieros</h4>
+            <p>Recomendaciones de ahorro</p>
+          </ion-label>
+          <ion-toggle
+            slot="end"
+            [checked]="preferences.mostrarConsejos"
+            (ionChange)="togglePreference('mostrarConsejos', $event)">
+          </ion-toggle>
+        </ion-item>
+      </ion-list>
+    </div>
+
+    <!-- RESPALDO -->
+    <div class="section-card">
+      <h3>Respaldo de información</h3>
+      <p class="section-description">
+        Genera y descarga un PDF ligero con tu perfil, movimientos,
+        presupuestos y metas de ahorro.
+      </p>
+
+      <ion-button expand="block" class="export-button" (click)="exportBackup()">
+        <ion-icon name="download-outline" slot="start"></ion-icon>
+        Exportar mis datos (PDF)
+      </ion-button>
+    </div>
+
+    <!-- RESTABLECER -->
+    <div class="section-card">
+      <h3>Restablecer preferencias</h3>
+      <p class="section-description">
+        Restablece las preferencias de notificaciones, alertas y consejos.
+        No elimina tus ingresos, gastos, presupuestos ni metas.
+      </p>
+
+      <ion-button expand="block" fill="outline" class="reset-button" (click)="resetPreferences()">
+        <ion-icon name="refresh-outline" slot="start"></ion-icon>
+        Restablecer configuración
+      </ion-button>
+    </div>
+
+    <!-- PERFIL -->
+    <ion-button expand="block" class="profile-button" (click)="goToProfile()">
+      <ion-icon name="person-outline" slot="start"></ion-icon>
+      Administrar mi perfil
+    </ion-button>
+
+  </div>
+</ion-content>

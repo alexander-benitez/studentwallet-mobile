@@ -33,11 +33,7 @@ export class TransactionService {
   private balanceSubject = new BehaviorSubject<number>(0);
   balance$ = this.balanceSubject.asObservable();
 
-  // Estados reactivos para Metas
-  private goalsSubject = new BehaviorSubject<Goal[]>([
-    { id: 1, title: 'Comprar una laptop', targetAmount: 700, currentAmount: 420, icon: '💻' },
-    { id: 2, title: 'Fondo de emergencia', targetAmount: 300, currentAmount: 150, icon: '🛡️' }
-  ]);
+  private goalsSubject = new BehaviorSubject<Goal[]>([]);
   goals$ = this.goalsSubject.asObservable();
 
   constructor() {
@@ -169,36 +165,81 @@ export class TransactionService {
     return false;
   }
 
-  // Métodos para la gestión de Metas
-  // Métodos para la gestión de Metas (MOV-05-01)
-  addGoal(goal: Goal) {
-    const current = this.goalsSubject.getValue();
-    const updated = [ { ...goal, id: Date.now() }, ...current ];
-    this.goalsSubject.next(updated);
+  async loadGoalsFromApi(): Promise<Goal[]> {
+    try {
+      const res = await fetch(`${environment.apiUrl}/goals`, {
+        headers: this.getHeaders()
+      });
+      if (res.ok) {
+        const json = await res.json();
+        const rawList = json.data || [];
+        
+        const mapped: Goal[] = rawList.map((item: any) => ({
+          id: item.id,
+          title: item.name,
+          targetAmount: Number(item.target_amount),
+          currentAmount: Number(item.current_amount),
+          icon: '🎯',
+          deadline: item.deadline
+        }));
+
+        this.goalsSubject.next(mapped);
+        return mapped;
+      }
+    } catch (err) {
+      console.error('Error al cargar metas:', err);
+    }
+    return [];
   }
 
-  addContribution(goalId: number | string, amount: number) {
-    const current = this.goalsSubject.getValue();
-    const updated = current.map(g => {
-      if (g.id === goalId) {
-        const newAmount = Math.min(g.currentAmount + amount, g.targetAmount);
-        return { ...g, currentAmount: newAmount };
-      }
-      return g;
-    });
-    this.goalsSubject.next(updated);
+  async addGoal(goal: Goal): Promise<boolean> {
+    try {
+      const body = {
+        name: goal.title,
+        target_amount: goal.targetAmount,
+        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+      };
 
-    // Registramos automáticamente el aporte como movimiento
-    // Registramos automáticamente el aporte como un gasto o movimiento si se desea reflejar en saldo
-    this.addMovement({
-      id: Date.now(),
-      category: 'Ahorro',
-      subtitle: `Aporte a meta`,
-      amount: -Math.abs(amount),
-      isExpense: true,
-      icon: 'disc-outline',
-      iconBg: '#2a2216',
-      period: 'week'
-    });
+      const res = await fetch(`${environment.apiUrl}/goals`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        await this.loadGoalsFromApi();
+        return true;
+      }
+      const errorBody = await res.text();
+      console.error('Error al crear meta:', res.status, errorBody);
+    } catch (err) {
+      console.error('Error al crear meta:', err);
+    }
+    return false;
+  }
+
+  async addContribution(goalId: number | string, amount: number): Promise<boolean> {
+    try {
+      const body = {
+        amount: amount,
+        note: 'Aporte desde app móvil'
+      };
+
+      const res = await fetch(`${environment.apiUrl}/goals/${goalId}/contributions`, {
+        method: 'POST',
+        headers: this.getHeaders(),
+        body: JSON.stringify(body)
+      });
+
+      if (res.ok) {
+        await this.loadGoalsFromApi();
+        return true;
+      }
+      const errorBody = await res.text();
+      console.error('Error al aportar:', res.status, errorBody);
+    } catch (err) {
+      console.error('Error al aportar:', err);
+    }
+    return false;
   }
 }

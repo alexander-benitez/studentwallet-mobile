@@ -25,11 +25,11 @@
       <h1>Toma el control de tu dinero.</h1>
       <p>Organiza tus gastos, alcanza tus metas y mejora tus finanzas.</p>
 
-      <ion-button expand="block" class="btn-login" routerLink="/login">
+      <ion-button expand="block" class="btn-login" (click)="goToLogin()">
         Iniciar sesión
       </ion-button>
 
-      <ion-button expand="block" fill="clear" class="btn-register" routerLink="/register">
+      <ion-button expand="block" fill="outline" class="btn-register" (click)="goToRegister()">
         Crear cuenta
       </ion-button>
     </div>

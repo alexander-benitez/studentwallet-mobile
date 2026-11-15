@@ -242,4 +242,20 @@ export class TransactionService {
     }
     return false;
   }
+
+  get movementsValue(): Movement[] {
+    return this.movementsSubject.value;
+  }
+
+  get budgetsValue(): any[] {
+    return [];
+  }
+
+  get goalsValue(): Goal[] {
+    return this.goalsSubject.value;
+  }
+
+  get balanceValue(): number {
+    return this.balanceSubject.value;
+  }
 }

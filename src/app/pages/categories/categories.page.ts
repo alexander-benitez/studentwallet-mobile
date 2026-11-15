@@ -165,6 +165,11 @@ export class CategoriesPage implements OnInit, OnDestroy, ViewWillEnter {
     );
   }
 
+  // ts compat helper
+  private _resData(res: any): any {
+    return res?.data;
+  }
+
   get totalGastos(): number {
     return this.categories.filter((categoria) => categoria.type === 'gasto').length;
   }

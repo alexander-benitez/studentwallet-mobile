@@ -9,6 +9,23 @@ export interface ApiResponse<T> {
   data: T;
 }
 
+export interface Category {
+  id: number;
+  name: string;
+  type: 'ingreso' | 'gasto';
+  icon?: string | null;
+  color?: string | null;
+  is_default?: boolean;
+  user_id?: number | null;
+}
+
+export interface CategoryPayload {
+  name: string;
+  type: 'ingreso' | 'gasto';
+  icon?: string;
+  color?: string;
+}
+
 export interface Suggestion {
   id: number;
   user_id: number;
@@ -82,6 +99,36 @@ export class ApiService {
   getBudgets(): Observable<ApiResponse<Budget[]>> {
     return this.http.get<ApiResponse<Budget[]>>(
       `${this.apiUrl}/budgets`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  getCategories(): Observable<ApiResponse<Category[]>> {
+    return this.http.get<ApiResponse<Category[]>>(
+      `${this.apiUrl}/categories`,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  createCategory(data: CategoryPayload): Observable<ApiResponse<Category>> {
+    return this.http.post<ApiResponse<Category>>(
+      `${this.apiUrl}/categories`,
+      data,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  updateCategory(id: number, data: CategoryPayload): Observable<ApiResponse<Category>> {
+    return this.http.put<ApiResponse<Category>>(
+      `${this.apiUrl}/categories/${id}`,
+      data,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  deleteCategory(id: number): Observable<ApiResponse<any>> {
+    return this.http.delete<ApiResponse<any>>(
+      `${this.apiUrl}/categories/${id}`,
       { headers: this.getHeaders() }
     );
   }

@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -41,12 +41,12 @@ export class ResetPasswordPage {
   showConfirmPassword: boolean = false;
   isLoading: boolean = false;
 
-  constructor(
-    private router: Router,
-    private route: ActivatedRoute,
-    private toastController: ToastController,
-    private ngZone: NgZone
-  ) {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private toastController = inject(ToastController);
+  private ngZone = inject(NgZone);
+
+  constructor() {
     addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
     const emailParam = this.route.snapshot.queryParamMap.get('email');
     if (emailParam) {
@@ -63,20 +63,34 @@ export class ResetPasswordPage {
   }
 
   async onSubmit() {
+    if (this.isLoading) return;
+
     const email = this.email.trim();
     const code = this.code.trim();
+    const password = this.password.trim();
+    const passwordConfirmation = this.passwordConfirmation.trim();
 
-    if (!email || !code || !this.password || !this.passwordConfirmation) {
+    if (!email || !code || !password || !passwordConfirmation) {
       await this.showToast('Por favor completa todos los campos.', 'danger');
       return;
     }
 
-    if (this.password.length < 6) {
-      await this.showToast('La contraseña debe tener al menos 6 caracteres.', 'danger');
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      await this.showToast('Ingresa un correo electrónico válido.', 'danger');
       return;
     }
 
-    if (this.password !== this.passwordConfirmation) {
+    if (!/^\d{6}$/.test(code)) {
+      await this.showToast('Ingresa el código de 6 dígitos.', 'danger');
+      return;
+    }
+
+    if (password.length < 8) {
+      await this.showToast('La contraseña debe tener al menos 8 caracteres.', 'danger');
+      return;
+    }
+
+    if (password !== passwordConfirmation) {
       await this.showToast('Las contraseñas no coinciden.', 'danger');
       return;
     }
@@ -92,14 +106,17 @@ export class ResetPasswordPage {
         body: JSON.stringify({
           email,
           code,
-          password: this.password,
-          password_confirmation: this.passwordConfirmation
+          password,
+          password_confirmation: passwordConfirmation
         })
       });
       const data = await response.json().catch(() => ({}));
 
       if (response.ok) {
-        await this.showToast(data.message || 'Contraseña actualizada correctamente.', 'success');
+        await this.showToast(
+          data.message || 'Contraseña actualizada. Redirigiendo al inicio de sesión...',
+          'success'
+        );
         await this.ngZone.run(() => this.router.navigate(['/login'], { replaceUrl: true }));
       } else {
         await this.showToast(data.message || 'No se pudo restablecer la contraseña.', 'danger');

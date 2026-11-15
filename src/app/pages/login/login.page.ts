@@ -1,4 +1,4 @@
-import { Component, NgZone } from '@angular/core';
+import { Component, NgZone, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -39,12 +39,12 @@ export class LoginPage {
   showPassword: boolean = false;
   isLoading: boolean = false;
 
-  constructor(
-    private router: Router,
-    private alertController: AlertController,
-    private toastController: ToastController,
-    private ngZone: NgZone
-  ) {
+  private router = inject(Router);
+  private alertController = inject(AlertController);
+  private toastController = inject(ToastController);
+  private ngZone = inject(NgZone);
+
+  constructor() {
     addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
   }
 

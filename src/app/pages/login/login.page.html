@@ -55,13 +55,16 @@
       </div>
 
       <!-- Botón Iniciar Sesión -->
-      <ion-button 
-        expand="block" 
-        type="submit" 
-        class="btn-submit" 
+      <ion-button
+        expand="block"
+        type="submit"
+        class="btn-submit"
         [disabled]="isLoading">
-        <ion-spinner *ngIf="isLoading" name="crescent"></ion-spinner>
-        <span *ngIf="!isLoading">Iniciar sesión</span>
+        @if (isLoading) {
+          <ion-spinner name="crescent"></ion-spinner>
+        } @else {
+          <span>Iniciar sesión</span>
+        }
       </ion-button>
     </form>
 

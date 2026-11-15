@@ -100,7 +100,7 @@ export class TransactionService {
             subtitle: item.description || item.descripcion || 'Movimiento',
             amount: isExpense ? -absAmount : absAmount,
             isExpense: isExpense,
-            icon: isExpense ? 'cart-outline' : 'cash-outline',
+            icon: isExpense ? 'cash-outline' : 'cash-outline',
             iconBg: isExpense ? '#2a2216' : '#133023',
             period: 'week'
           };

@@ -1,0 +1,288 @@
+<ion-header class="ion-no-border">
+  <ion-toolbar class="categories-toolbar">
+    <ion-title>Categorías</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarCategorias()" [disabled]="loading" aria-label="Actualizar categorías">
+        <ion-icon slot="icon-only" name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="categories-content" [fullscreen]="true">
+  <div class="page-wrapper">
+    <div class="intro">
+      <div class="intro-icon">
+        <ion-icon name="pricetags-outline"></ion-icon>
+      </div>
+      <h1>Mis categorías</h1>
+      <p>Personaliza las categorías de tus ingresos y gastos.</p>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card summary-expense-card">
+        <div class="summary-icon summary-expense">
+          <ion-icon name="trending-down-outline"></ion-icon>
+        </div>
+        <div>
+          <span class="summary-label">Categorías de gastos</span>
+          <strong>{{ totalGastos }}</strong>
+        </div>
+      </div>
+
+      <div class="summary-card summary-income-card">
+        <div class="summary-icon summary-income">
+          <ion-icon name="trending-up-outline"></ion-icon>
+        </div>
+        <div>
+          <span class="summary-label">Categorías de ingresos</span>
+          <strong>{{ totalIngresos }}</strong>
+        </div>
+      </div>
+    </div>
+
+    @if (mensaje) {
+      <div class="feedback" [ngClass]="'feedback-' + tipoMensaje">
+        @if (tipoMensaje === 'error') {
+          <ion-icon name="alert-circle-outline"></ion-icon>
+        }
+
+        @if (tipoMensaje === 'success') {
+          <ion-icon name="checkmark-outline"></ion-icon>
+        }
+
+        <span>{{ mensaje }}</span>
+      </div>
+    }
+
+    <div class="filters">
+      <div class="type-switch">
+        <button
+          type="button"
+          class="switch-btn"
+          [class.active]="tipoActivo === 'gasto'"
+          (click)="seleccionarTipo('gasto')"
+        >
+          <ion-icon name="trending-down-outline"></ion-icon>
+          Gastos
+        </button>
+
+        <button
+          type="button"
+          class="switch-btn"
+          [class.active]="tipoActivo === 'ingreso'"
+          (click)="seleccionarTipo('ingreso')"
+        >
+          <ion-icon name="trending-up-outline"></ion-icon>
+          Ingresos
+        </button>
+      </div>
+
+      <div class="search-box">
+        <ion-icon name="search-outline"></ion-icon>
+        <input
+          type="search"
+          [(ngModel)]="busqueda"
+          name="busqueda"
+          placeholder="Buscar categoría..."
+          autocomplete="off"
+        />
+      </div>
+    </div>
+
+    @if (loading) {
+      <div class="loading-state">
+        <ion-spinner name="crescent"></ion-spinner>
+        <span>Cargando categorías...</span>
+      </div>
+    }
+
+    @if (!loading && categoriasFiltradas.length === 0) {
+      <div class="empty-state">
+        <ion-icon name="pricetags-outline"></ion-icon>
+        <p>No se encontraron categorías. Puedes crear una nueva con el botón de abajo.</p>
+      </div>
+    }
+
+    @if (!loading && categoriasFiltradas.length > 0) {
+      <div class="category-list">
+        @for (categoria of categoriasFiltradas; track categoria.id) {
+          <div class="category-card">
+            <div
+              class="category-icon"
+              [style.background-color]="colorDe(categoria) + '20'"
+            >
+              <ion-icon
+                [name]="iconoDe(categoria)"
+                [style.color]="colorDe(categoria)"
+              ></ion-icon>
+            </div>
+
+            <div class="category-texts">
+              <span class="category-name">{{ categoria.name }}</span>
+
+              <div class="category-meta">
+                <span
+                  class="type-chip"
+                  [ngClass]="categoria.type === 'ingreso' ? 'chip-income' : 'chip-expense'"
+                >
+                  {{ categoria.type === 'ingreso' ? 'Ingreso' : 'Gasto' }}
+                </span>
+
+                @if (esCategoriaDelSistema(categoria)) {
+                  <span class="system-chip">Del sistema</span>
+                }
+              </div>
+            </div>
+
+            @if (!esCategoriaDelSistema(categoria)) {
+              <div class="category-actions">
+                <button
+                  type="button"
+                  class="action-btn"
+                  (click)="abrirEditar(categoria)"
+                  aria-label="Editar categoría"
+                >
+                  <ion-icon name="create-outline"></ion-icon>
+                </button>
+
+                <button
+                  type="button"
+                  class="action-btn action-danger"
+                  (click)="eliminarCategoria(categoria)"
+                  aria-label="Eliminar categoría"
+                >
+                  <ion-icon name="trash-outline"></ion-icon>
+                </button>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (mostrarFormulario) {
+      <div class="category-form">
+        <div class="form-header">
+          <div>
+            <h3>{{ editandoId ? 'Editar categoría' : 'Nueva categoría' }}</h3>
+            <p>Completa los datos para sincronizarla con la web.</p>
+          </div>
+
+          <button
+            type="button"
+            class="close-btn"
+            (click)="cerrarFormulario()"
+            aria-label="Cerrar formulario"
+          >
+            <ion-icon name="close-outline"></ion-icon>
+          </button>
+        </div>
+
+        <label class="field-label">Nombre de la categoría</label>
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="form.nombre"
+          name="nombre"
+          maxlength="40"
+          placeholder="Ej. Servicios básicos"
+          autocomplete="off"
+        />
+
+        <label class="field-label">Tipo de categoría</label>
+        <div class="tipo-switch">
+          <button
+            type="button"
+            class="switch-btn"
+            [class.active]="form.tipo === 'gasto'"
+            (click)="form.tipo = 'gasto'"
+          >
+            Gasto
+          </button>
+
+          <button
+            type="button"
+            class="switch-btn"
+            [class.active]="form.tipo === 'ingreso'"
+            (click)="form.tipo = 'ingreso'"
+          >
+            Ingreso
+          </button>
+        </div>
+
+        <label class="field-label">Selecciona un ícono</label>
+        <div class="icon-grid">
+          @for (icono of iconos; track icono.mdi) {
+            <button
+              type="button"
+              class="icon-option"
+              [class.selected]="form.icono === icono.mdi"
+              [attr.aria-label]="icono.label"
+              (click)="form.icono = icono.mdi"
+            >
+              <ion-icon [name]="icono.ion"></ion-icon>
+            </button>
+          }
+        </div>
+
+        <label class="field-label">Selecciona un color</label>
+        <div class="colors">
+          @for (color of colores; track color) {
+            <button
+              type="button"
+              class="color-option"
+              [class.selected]="form.color === color"
+              [style.background-color]="color"
+              [attr.aria-label]="'Seleccionar color ' + color"
+              (click)="form.color = color"
+            >
+              @if (form.color === color) {
+                <ion-icon name="checkmark-outline"></ion-icon>
+              }
+            </button>
+          }
+        </div>
+
+        <div class="form-actions">
+          <ion-button
+            expand="block"
+            fill="outline"
+            color="medium"
+            (click)="cerrarFormulario()"
+            [disabled]="guardando"
+          >
+            Cancelar
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            color="primary"
+            (click)="guardarCategoria()"
+            [disabled]="guardando"
+          >
+            @if (guardando) {
+              <ion-spinner name="crescent" slot="start"></ion-spinner>
+            }
+
+            @if (!guardando) {
+              <ion-icon slot="start" name="checkmark-outline"></ion-icon>
+            }
+
+            {{ guardando ? 'Guardando...' : (editandoId ? 'Guardar cambios' : 'Crear categoría') }}
+          </ion-button>
+        </div>
+      </div>
+    }
+
+    @if (!mostrarFormulario) {
+      <div class="add-category">
+        <ion-button expand="block" color="primary" (click)="abrirCrear()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>
+          Agregar categoría
+        </ion-button>
+      </div>
+    }
+  </div>
+</ion-content>

@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonTabs, IonTabBar, IonTabButton, IonIcon, IonLabel } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { homeOutline, swapVerticalOutline, flagOutline, barChartOutline, personOutline, chatbubbleEllipsesOutline, walletOutline } from 'ionicons/icons';
+import { barChartOutline, chatbubbleEllipsesOutline, flagOutline, homeOutline, personOutline, pricetagsOutline, settingsOutline, swapVerticalOutline, walletOutline } from 'ionicons/icons';
 
 @Component({
   selector: 'app-tabs',
@@ -28,7 +28,9 @@ export class TabsPage {
       barChartOutline,
       personOutline,
       chatbubbleEllipsesOutline,
-      walletOutline
+      walletOutline,
+      pricetagsOutline,
+      settingsOutline
     });
   }
 }

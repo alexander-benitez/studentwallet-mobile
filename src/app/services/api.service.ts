@@ -1,7 +1,9 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, timeout } from 'rxjs';
 import { environment } from '../../environments/environment';
+
+const REQUEST_TIMEOUT = 15000;
 
 export interface ApiResponse<T> {
   status: string;
@@ -28,6 +30,21 @@ export interface BudgetCategory {
   id: number;
   name: string;
   type?: string;
+  icon?: string | null;
+  color?: string | null;
+}
+
+export interface Category extends BudgetCategory {
+  type: 'ingreso' | 'gasto';
+  icon?: string | null;
+  color?: string | null;
+  is_default?: boolean;
+  user_id?: number | null;
+}
+
+export interface CategoryPayload {
+  name: string;
+  type: 'ingreso' | 'gasto';
   icon?: string;
   color?: string;
 }
@@ -82,6 +99,51 @@ export class ApiService {
   getBudgets(): Observable<ApiResponse<Budget[]>> {
     return this.http.get<ApiResponse<Budget[]>>(
       `${this.apiUrl}/budgets`,
+      { headers: this.getHeaders() }
+    ).pipe(timeout(REQUEST_TIMEOUT));
+  }
+
+  getCategories(): Observable<ApiResponse<Category[]>> {
+    return this.http.get<ApiResponse<Category[]>>(
+      `${this.apiUrl}/categories`,
+      { headers: this.getHeaders() }
+    ).pipe(timeout(REQUEST_TIMEOUT));
+  }
+
+  createCategory(data: CategoryPayload): Observable<ApiResponse<Category>> {
+    return this.http.post<ApiResponse<Category>>(
+      `${this.apiUrl}/categories`,
+      data,
+      { headers: this.getHeaders() }
+    ).pipe(timeout(REQUEST_TIMEOUT));
+  }
+
+  updateCategory(id: number, data: CategoryPayload): Observable<ApiResponse<Category>> {
+    return this.http.put<ApiResponse<Category>>(
+      `${this.apiUrl}/categories/${id}`,
+      data,
+      { headers: this.getHeaders() }
+    ).pipe(timeout(REQUEST_TIMEOUT));
+  }
+
+  deleteCategory(id: number): Observable<ApiResponse<Category>> {
+    return this.http.delete<ApiResponse<Category>>(
+      `${this.apiUrl}/categories/${id}`,
+      { headers: this.getHeaders() }
+    ).pipe(timeout(REQUEST_TIMEOUT));
+  }
+
+  createBudget(data: { category_id: number; amount: number; month: number; year: number }): Observable<ApiResponse<Budget>> {
+    return this.http.post<ApiResponse<Budget>>(
+      `${this.apiUrl}/budgets`,
+      data,
+      { headers: this.getHeaders() }
+    );
+  }
+
+  deleteBudget(id: number): Observable<ApiResponse<Budget>> {
+    return this.http.delete<ApiResponse<Budget>>(
+      `${this.apiUrl}/budgets/${id}`,
       { headers: this.getHeaders() }
     );
   }

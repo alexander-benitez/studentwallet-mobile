@@ -1,14 +1,38 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ModalController } from '@ionic/angular';
+import { Router } from '@angular/router';
+import { IonIcon, ModalController } from '@ionic/angular';
+import { addIcons } from 'ionicons';
+import {
+  briefcaseOutline,
+  busOutline,
+  cartOutline,
+  cashOutline,
+  fastFoodOutline,
+  gameControllerOutline,
+  giftOutline,
+  heartOutline,
+  homeOutline,
+  laptopOutline,
+  pricetagOutline,
+  saveOutline,
+  schoolOutline,
+  settingsOutline,
+  walletOutline,
+} from 'ionicons/icons';
 import { TransactionService } from '../../services/transaction';
+import {
+  DEFAULT_CATEGORY_COLOR,
+  toIonicon,
+} from '../../utils/category-icons';
 
 interface Category {
   id: number;
   name: string;
   type: 'ingreso' | 'gasto';
-  icon?: string;
+  icon: string;
+  color: string;
 }
 
 @Component({
@@ -16,7 +40,7 @@ interface Category {
   templateUrl: './add-movement-modal.component.html',
   styleUrls: ['./add-movement-modal.component.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, IonIcon],
 })
 export class AddMovementModalComponent implements OnInit {
   @Input() initialType: 'ingreso' | 'gasto' = 'gasto';
@@ -26,17 +50,39 @@ export class AddMovementModalComponent implements OnInit {
   selectedCategoryId: number | null = null;
   date: string = new Date().toISOString().split('T')[0];
   description: string = '';
+  concepto: string = '';
   categories: Category[] = [];
 
-  constructor(
-    private modalCtrl: ModalController,
-    private transactionService: TransactionService
-  ) {}
+  private modalCtrl = inject(ModalController);
+  private transactionService = inject(TransactionService);
+  private router = inject(Router);
+
+  constructor() {
+    addIcons({
+      briefcaseOutline,
+      busOutline,
+      cartOutline,
+      cashOutline,
+      fastFoodOutline,
+      gameControllerOutline,
+      giftOutline,
+      heartOutline,
+      homeOutline,
+      laptopOutline,
+      pricetagOutline,
+      saveOutline,
+      schoolOutline,
+      settingsOutline,
+      walletOutline,
+    });
+  }
 
   async ngOnInit() {
+    this.setType(this.initialType || 'gasto');
     await this.loadCategories();
-    if (this.initialType) {
-      this.setType(this.initialType);
+    if (!this.selectedCategoryId || !this.currentCategories.some((cat) => cat.id === this.selectedCategoryId)) {
+      const firstCategory = this.currentCategories[0];
+      this.selectedCategoryId = firstCategory ? firstCategory.id : null;
     }
   }
 
@@ -46,7 +92,8 @@ export class AddMovementModalComponent implements OnInit {
       id: Number(cat.id),
       name: cat.name,
       type: cat.type,
-      icon: this.getCategoryEmoji(cat.name)
+      icon: toIonicon(cat.icon),
+      color: cat.color || DEFAULT_CATEGORY_COLOR,
     }));
   }
 
@@ -64,13 +111,21 @@ export class AddMovementModalComponent implements OnInit {
     this.selectedCategoryId = id;
   }
 
+  private get selectedCategory(): Category | undefined {
+    return this.categories.find(cat => cat.id === this.selectedCategoryId);
+  }
+
   private get selectedCategoryName(): string {
-    const match = this.categories.find(cat => cat.id === this.selectedCategoryId);
-    return match ? match.name : '';
+    return this.selectedCategory?.name ?? '';
   }
 
   cancel() {
     this.modalCtrl.dismiss(null, 'cancel');
+  }
+
+  async manageCategories() {
+    await this.modalCtrl.dismiss(null, 'cancel');
+    await this.router.navigate(['/tabs/categories']);
   }
 
   save() {
@@ -84,44 +139,39 @@ export class AddMovementModalComponent implements OnInit {
       return;
     }
 
+    const category = this.selectedCategory;
     const categoryName = this.selectedCategoryName;
+    const color = category?.color || DEFAULT_CATEGORY_COLOR;
+
+    const movementDate = this.date ? new Date(this.date) : new Date();
+    const now = new Date();
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+    const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(endOfWeek.getDate() + 6);
+    const startOfDay = new Date(movementDate.getFullYear(), movementDate.getMonth(), movementDate.getDate());
+    const endOfDay = new Date(startOfDay);
+    endOfDay.setDate(endOfDay.getDate() + 1);
+    const period = startOfDay >= startOfMonth && startOfDay <= endOfMonth
+      ? 'month'
+      : startOfDay >= startOfWeek && startOfDay <= endOfWeek
+        ? 'week'
+        : 'month';
+
     const newMovement = {
       categoryId: Number(this.selectedCategoryId),
       category: categoryName,
-      subtitle: this.description ? `Hoy · ${this.description}` : 'Hoy · Movimiento',
+      subtitle: this.description ? `${this.date} · ${this.description}` : this.date,
+      concepto: this.concepto,
       amount: this.type === 'gasto' ? -Math.abs(this.amount) : Math.abs(this.amount),
       isExpense: this.type === 'gasto',
-      icon: this.getIconForCategory(categoryName),
-      iconBg: this.type === 'gasto' ? '#2a2216' : '#133023',
-      period: 'week' as const
+      icon: category?.icon || 'pricetag-outline',
+      iconBg: `${color}22`,
+      period: period as 'week' | 'month',
+      date: this.date
     };
 
     this.modalCtrl.dismiss(newMovement, 'created');
-  }
-
-  private getCategoryEmoji(cat: string): string {
-    switch (cat) {
-      case 'Alimentación':
-      case 'Comida': return '🍔';
-      case 'Transporte': return '🚌';
-      case 'Estudios': return '📚';
-      case 'Entretenimiento': return '🎮';
-      case 'Beca': return '💰';
-      case 'Mesada': return '🛡️';
-      default: return '🏠';
-    }
-  }
-
-  private getIconForCategory(cat: string): string {
-    switch (cat) {
-      case 'Alimentación':
-      case 'Comida': return 'fast-food-outline';
-      case 'Transporte': return 'bus-outline';
-      case 'Estudios': return 'book-outline';
-      case 'Entretenimiento': return 'game-controller-outline';
-      case 'Beca': return 'cash-outline';
-      case 'Mesada': return 'wallet-outline';
-      default: return 'home-outline';
-    }
   }
 }

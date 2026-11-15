@@ -40,6 +40,18 @@ export const routes: Routes = [
         path: 'budgets',
         loadComponent: () =>
           import('../pages/budgets/budgets.page').then((m) => m.BudgetsPage),
+      },
+      {
+        path: 'categories',
+        loadComponent: () =>
+          import('../pages/categories/categories.page').then((m) => m.CategoriesPage),
+      },
+      {
+        path: 'configuracion',
+        loadComponent: () =>
+          import('../pages/configuracion/configuracion.page').then(
+            (m) => m.ConfiguracionPage
+          ),
       }
     ],
   },

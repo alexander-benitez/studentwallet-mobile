@@ -71,33 +71,73 @@
     --border-color: #1e293b;
     --padding-start: 16px;
     --inner-padding-end: 16px;
+    --highlight-color-focused: #2563eb;
     margin-bottom: 10px;
     border-radius: 14px;
     border: 1px solid #1e293b;
 
-    ion-icon {
-      color: #2b66f6;
-      font-size: 1.3rem;
-      margin-right: 12px;
-    }
+    ion-input {
+      --color: #ffffff;
+      --placeholder-color: #475569;
+      --padding-start: 0;
+      font-size: 0.95rem;
 
-    ion-label {
-      p {
-        font-size: 0.75rem;
+      &::part(label) {
         color: #94a3b8;
-        margin: 0 0 2px 0;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.5px;
-      }
-
-      h3 {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #ffffff;
-        margin: 0;
+        margin-bottom: 4px;
       }
     }
   }
+}
+
+.save-button {
+  --background: #10b981;
+  --background-activated: #059669;
+  --border-radius: 14px;
+  --color: #ffffff;
+  height: 52px;
+  font-weight: 700;
+  text-transform: none;
+  margin: 0 0 12px 0;
+}
+
+.password-card {
+  background: #111726;
+  border: 1px solid #1e293b;
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 20px;
+
+  h3 {
+    margin: 0 0 4px 0;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+  }
+
+  p {
+    margin: 0 0 12px 0;
+    font-size: 0.82rem;
+    color: #94a3b8;
+  }
+
+  .profile-list {
+    margin-bottom: 12px;
+  }
+}
+
+.password-button {
+  --background: #2563eb;
+  --background-activated: #1d4ed8;
+  --border-radius: 14px;
+  --color: #ffffff;
+  height: 48px;
+  font-weight: 700;
+  text-transform: none;
+  margin: 0;
 }
 
 .logout-button {

@@ -1,17 +1,20 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { ApiService, Budget } from './api.service';
 
 export interface Movement {
   id: number;
   category: string;
   categoryId?: number;
   subtitle: string;
+  concepto?: string;
   amount: number;
   isExpense: boolean;
   icon: string;
   iconBg: string;
   period: 'week' | 'month';
+  date?: string;
 }
 
 export interface Goal {
@@ -36,6 +39,30 @@ export class TransactionService {
   private goalsSubject = new BehaviorSubject<Goal[]>([]);
   goals$ = this.goalsSubject.asObservable();
 
+  private budgetsSubject = new BehaviorSubject<Budget[]>([]);
+  budgets$ = this.budgetsSubject.asObservable();
+
+  get budgetsValue(): Budget[] {
+    return this.budgetsSubject.value;
+  }
+
+  get movementsValue(): Movement[] {
+    return this.movementsSubject.value;
+  }
+
+  get goalsValue(): Goal[] {
+    return this.goalsSubject.value;
+  }
+
+  get balanceValue(): number {
+    return this.balanceSubject.value;
+  }
+
+  private recommendationsSubject = new BehaviorSubject<any[]>([]);
+  recommendations$ = this.recommendationsSubject.asObservable();
+
+  private api = inject(ApiService);
+
   constructor() {
     this.refreshData();
   }
@@ -52,8 +79,46 @@ export class TransactionService {
   async refreshData() {
     await Promise.all([
       this.loadBalanceFromApi(),
-      this.loadMovementsFromApi()
+      this.loadMovementsFromApi(),
+      this.loadBudgetsFromApi(),
+      this.loadRecommendationsFromApi()
     ]);
+  }
+
+  async loadBudgetsFromApi(): Promise<Budget[]> {
+    try {
+      const res = await fetch(`${environment.apiUrl}/budgets`, {
+        headers: this.getHeaders()
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const data = json.data ?? [];
+        this.budgetsSubject.next(data);
+        return data;
+      }
+    } catch (err) {
+      console.error('Error al obtener presupuestos:', err);
+    }
+    return this.budgetsSubject.value;
+  }
+
+  async loadRecommendationsFromApi(): Promise<any[]> {
+    try {
+      const res = await fetch(`${environment.apiUrl}/recommendations`, {
+        headers: this.getHeaders()
+      });
+
+      if (res.ok) {
+        const json = await res.json();
+        const data = json.data ?? [];
+        this.recommendationsSubject.next(data);
+        return data;
+      }
+    } catch (err) {
+      console.error('Error al obtener recomendaciones:', err);
+    }
+    return this.recommendationsSubject.value;
   }
 
   async loadBalanceFromApi(): Promise<number> {
@@ -89,6 +154,23 @@ export class TransactionService {
           const absAmount = Math.abs(Number(item.amount));
           const categoryName = item.category?.name || item.category || 'General';
 
+          const movementDate = item.date ? new Date(item.date) : new Date();
+          const now = new Date();
+          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+          const startOfWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - now.getDay());
+          const endOfWeek = new Date(startOfWeek);
+          endOfWeek.setDate(endOfWeek.getDate() + 6);
+          const startOfDay = new Date(movementDate.getFullYear(), movementDate.getMonth(), movementDate.getDate());
+          const endOfDay = new Date(startOfDay);
+          endOfDay.setDate(endOfDay.getDate() + 1);
+
+          const period = startOfDay >= startOfMonth && startOfDay <= endOfMonth
+            ? 'month'
+            : startOfDay >= startOfWeek && startOfDay <= endOfWeek
+              ? 'week'
+              : 'month';
+
           return {
             id: item.id,
             category: categoryName,
@@ -98,7 +180,7 @@ export class TransactionService {
             isExpense: isExpense,
             icon: isExpense ? 'cash-outline' : 'cash-outline',
             iconBg: isExpense ? '#2a2216' : '#133023',
-            period: 'week'
+            period
           };
         });
 
@@ -139,11 +221,12 @@ export class TransactionService {
       }
 
       const body = {
-        amount: Number(item.amount),
+        amount: Math.abs(Number(item.amount)),
         type: item.isExpense ? 'gasto' : 'ingreso',
         category_id: categoryId,
         description: item.subtitle || item.category,
-        date: new Date().toISOString().split('T')[0]
+        concepto: item.concepto || null,
+        date: item.date || new Date().toISOString().split('T')[0]
       };
 
       const res = await fetch(`${environment.apiUrl}/transactions`, {
@@ -197,7 +280,7 @@ export class TransactionService {
       const body = {
         name: goal.title,
         target_amount: goal.targetAmount,
-        deadline: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+        deadline: goal.deadline ?? null
       };
 
       const res = await fetch(`${environment.apiUrl}/goals`, {

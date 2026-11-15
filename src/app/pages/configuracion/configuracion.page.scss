@@ -1,0 +1,218 @@
+.settings-header {
+  ion-toolbar {
+    --background: #080d1a;
+    --color: #ffffff;
+  }
+
+  ion-title {
+    font-weight: 700;
+  }
+}
+
+.settings-content {
+  --background: #080d1a;
+  color: #ffffff;
+}
+
+.settings-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 18px 90px 18px;
+}
+
+/* RESUMEN */
+.summary-card {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #4338ca 100%);
+  border-radius: 24px;
+  padding: 22px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+
+  .summary-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+
+    .summary-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.18);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      ion-icon {
+        font-size: 1.5rem;
+        color: #ffffff;
+      }
+    }
+
+    h2 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+      margin: 0 0 2px 0;
+    }
+
+    p {
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin: 0;
+    }
+  }
+
+  .summary-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 18px;
+
+    .summary-item {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 12px 8px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+
+      ion-icon {
+        font-size: 1.15rem;
+        color: rgba(255, 255, 255, 0.85);
+      }
+
+      strong {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: #ffffff;
+      }
+
+      span {
+        font-size: 0.65rem;
+        color: rgba(255, 255, 255, 0.75);
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+        line-height: 1.2;
+      }
+    }
+  }
+
+  .summary-balance {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 14px;
+    padding: 14px 16px;
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      color: rgba(255, 255, 255, 0.75);
+      margin-bottom: 4px;
+    }
+
+    strong {
+      font-size: 1.6rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+  }
+}
+
+/* SECCIONES */
+.section-card {
+  background: #111726;
+  border: 1px solid #1e293b;
+  border-radius: 20px;
+  padding: 20px;
+  margin-bottom: 16px;
+
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin: 0 0 14px 0;
+  }
+
+  .section-description {
+    font-size: 0.85rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin: 0 0 16px 0;
+  }
+}
+
+.preferences-list {
+  background: transparent;
+
+  ion-item {
+    --background: transparent;
+    --color: #ffffff;
+    --padding-start: 0;
+    --inner-padding-end: 0;
+    margin-bottom: 6px;
+
+    ion-icon {
+      color: #2b66f6;
+      font-size: 1.3rem;
+      margin-right: 12px;
+    }
+
+    ion-label {
+      h4 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #ffffff;
+        margin: 0 0 2px 0;
+      }
+
+      p {
+        font-size: 0.78rem;
+        color: #94a3b8;
+        margin: 0;
+      }
+    }
+
+    ion-toggle {
+      --track-background: #1e293b;
+      --track-background-checked: #2563eb;
+    }
+  }
+}
+
+.export-button {
+  --background: #2563eb;
+  --background-activated: #1d4ed8;
+  --border-radius: 14px;
+  --color: #ffffff;
+  height: 50px;
+  font-weight: 700;
+  text-transform: none;
+  margin: 0;
+}
+
+.reset-button {
+  --border-color: #f59e0b;
+  --color: #fbbf24;
+  --border-radius: 14px;
+  height: 50px;
+  font-weight: 700;
+  text-transform: none;
+  margin: 0;
+}
+
+.profile-button {
+  --background: transparent;
+  --background-activated: #1e293b;
+  --border-color: #1e293b;
+  --color: #ffffff;
+  --border-radius: 14px;
+  border: 1px solid #1e293b;
+  height: 50px;
+  font-weight: 700;
+  text-transform: none;
+  margin: 0;
+}

@@ -1,9 +1,9 @@
 <ion-header class="ion-no-border auth-header-bar">
   <ion-toolbar class="auth-toolbar">
-    <a routerLink="/welcome" class="back-link">
+    <button type="button" class="back-link" (click)="goToWelcome()">
       <ion-icon name="chevron-back-outline"></ion-icon>
       <span>Volver</span>
-    </a>
+    </button>
   </ion-toolbar>
 </ion-header>
 
@@ -68,7 +68,7 @@
     <!-- Enlace inferior -->
     <div class="footer-link">
       <span>¿No tienes cuenta? </span>
-      <a routerLink="/register">Crear una cuenta</a>
+      <a (click)="goToRegister()">Crear una cuenta</a>
     </div>
   </div>
 </ion-content>

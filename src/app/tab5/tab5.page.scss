@@ -1,0 +1,112 @@
+.profile-header {
+  ion-toolbar {
+    --background: #080d1a;
+    --color: #ffffff;
+  }
+
+  ion-title {
+    font-weight: 700;
+  }
+}
+
+.profile-content {
+  --background: #080d1a;
+  color: #ffffff;
+}
+
+.profile-wrapper {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 24px 18px 90px 18px;
+}
+
+.profile-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 50%, #4338ca 100%);
+  border-radius: 24px;
+  padding: 28px 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.4);
+
+  .avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.18);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+
+  .profile-name {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin: 0 0 4px 0;
+    color: #ffffff;
+    text-align: center;
+  }
+
+  .profile-role {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    text-transform: capitalize;
+  }
+}
+
+.profile-list {
+  background: transparent;
+  margin-bottom: 24px;
+
+  ion-item {
+    --background: #111726;
+    --color: #ffffff;
+    --border-color: #1e293b;
+    --padding-start: 16px;
+    --inner-padding-end: 16px;
+    margin-bottom: 10px;
+    border-radius: 14px;
+    border: 1px solid #1e293b;
+
+    ion-icon {
+      color: #2b66f6;
+      font-size: 1.3rem;
+      margin-right: 12px;
+    }
+
+    ion-label {
+      p {
+        font-size: 0.75rem;
+        color: #94a3b8;
+        margin: 0 0 2px 0;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      h3 {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #ffffff;
+        margin: 0;
+      }
+    }
+  }
+}
+
+.logout-button {
+  --background: #ef4444;
+  --background-activated: #dc2626;
+  --border-radius: 14px;
+  --color: #ffffff;
+  height: 52px;
+  font-weight: 700;
+  text-transform: none;
+  margin: 0;
+}

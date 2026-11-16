@@ -68,7 +68,8 @@ export class LoginPage {
         },
         body: JSON.stringify({
           email: this.email.trim(),
-          password: this.password.trim()
+          password: this.password.trim(),
+          plataforma: 'movil'
         })
       });
 

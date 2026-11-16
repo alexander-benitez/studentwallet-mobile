@@ -1,4 +1,6 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://192.168.9.102:8000/api'
+  // Configure via CI/build env in real deployments (use HTTPS). Example:
+  // apiUrl: 'https://api.tudominio.com/api'
+  apiUrl: 'https://api.tudominio.com/api'
 };

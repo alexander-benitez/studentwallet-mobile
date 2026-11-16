@@ -61,7 +61,12 @@ export class Tab4Page implements OnInit, OnDestroy, ViewWillEnter {
   }
 
   ionViewWillEnter(): void {
-    void this.transactionService.refreshData();
+    void (async () => {
+      await this.transactionService.refreshData();
+      const bal = await this.transactionService.loadBalanceFromApi();
+      this.totalSavings = bal;
+      this.cdr.detectChanges();
+    })();
   }
 
   ngOnDestroy() {
@@ -85,8 +90,6 @@ export class Tab4Page implements OnInit, OnDestroy, ViewWillEnter {
     this.totalExpense = this.movements
       .filter(m => m.isExpense)
       .reduce((sum, m) => sum + Math.abs(m.amount), 0);
-
-    this.totalSavings = this.totalIncome - this.totalExpense;
 
     const yearMovements = this.movements.filter(m => (m.date ?? '').startsWith(String(year)));
     const expensesYear = yearMovements.filter(m => m.isExpense);

@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 
@@ -40,6 +41,8 @@ export class TransactionService {
 
   recommendations$ = of([] as { message: string }[]);
 
+  private router = inject(Router);
+
   constructor() {
     this.refreshData();
   }
@@ -51,6 +54,20 @@ export class TransactionService {
       'Accept': 'application/json',
       'Authorization': `Bearer ${token}`
     };
+  }
+
+  private handleUnauthorized(res: Response): boolean {
+    if (res.status === 401) {
+      try {
+        localStorage.removeItem('auth_token');
+        localStorage.removeItem('user_data');
+      } catch {
+        /* ignore */
+      }
+      void this.router.navigate(['/login'], { replaceUrl: true });
+      return true;
+    }
+    return false;
   }
 
   async refreshData() {
@@ -65,6 +82,7 @@ export class TransactionService {
       const res = await fetch(`${environment.apiUrl}/balance`, {
         headers: this.getHeaders()
       });
+      if (this.handleUnauthorized(res)) return this.balanceSubject.value;
       if (res.ok) {
         const json = await res.json();
         const totalIncomes = Number(json.data?.total_incomes ?? 0);
@@ -84,6 +102,7 @@ export class TransactionService {
       const res = await fetch(`${environment.apiUrl}/transactions`, {
         headers: this.getHeaders()
       });
+      if (this.handleUnauthorized(res)) return [];
       if (res.ok) {
         const json = await res.json();
         const rawList = json.data || json || [];
@@ -92,13 +111,14 @@ export class TransactionService {
           const isExpense = item.type === 'gasto' || item.type === 'expense' || Number(item.amount) < 0;
           const absAmount = Math.abs(Number(item.amount));
           const categoryName = item.category?.name || item.category || 'General';
-          const date = (item.date || item.transaction_date || item.created_at || '').toString().slice(0, 10);
+          const date = (item.date || item.transaction_date || '').toString().slice(0, 10) || (item.created_at || '').toString().slice(0, 10);
 
           return {
             id: item.id,
             category: categoryName,
             categoryId: item.category?.id ?? item.category_id,
             subtitle: item.description || item.descripcion || 'Movimiento',
+            concepto: item.description || item.descripcion || '',
             amount: isExpense ? -absAmount : absAmount,
             isExpense: isExpense,
             icon: isExpense ? 'cash-outline' : 'cash-outline',
@@ -122,6 +142,7 @@ export class TransactionService {
       const res = await fetch(`${environment.apiUrl}/categories`, {
         headers: this.getHeaders()
       });
+      if (this.handleUnauthorized(res)) return [];
 
       if (res.ok) {
         const json = await res.json().catch(() => ({}));
@@ -158,6 +179,9 @@ export class TransactionService {
         headers: this.getHeaders(),
         body: JSON.stringify(body)
       });
+      if (this.handleUnauthorized(res)) {
+        throw new Error('Sesión expirada. Inicia sesión nuevamente.');
+      }
 
       if (res.ok) {
         await this.refreshData();
@@ -177,6 +201,7 @@ export class TransactionService {
       const res = await fetch(`${environment.apiUrl}/goals`, {
         headers: this.getHeaders()
       });
+      if (this.handleUnauthorized(res)) return [];
       if (res.ok) {
         const json = await res.json();
         const rawList = json.data || [];
@@ -212,6 +237,7 @@ export class TransactionService {
         headers: this.getHeaders(),
         body: JSON.stringify(body)
       });
+      if (this.handleUnauthorized(res)) return false;
 
       if (res.ok) {
         await this.loadGoalsFromApi();
@@ -235,8 +261,9 @@ export class TransactionService {
       const res = await fetch(`${environment.apiUrl}/goals/${goalId}/contributions`, {
         method: 'POST',
         headers: this.getHeaders(),
-        body: JSON.stringify(body)
+        body: JSON.stringify({ amount })
       });
+      if (this.handleUnauthorized(res)) return false;
 
       if (res.ok) {
         await this.loadGoalsFromApi();

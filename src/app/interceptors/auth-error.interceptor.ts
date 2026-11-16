@@ -1,3 +1,4 @@
+import { Preferences } from '@capacitor/preferences';
 import { HttpInterceptorFn } from '@angular/common/http';
 import { inject } from '@angular/core';
 import { Router } from '@angular/router';
@@ -12,6 +13,8 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
           localStorage.removeItem('auth_token');
           localStorage.removeItem('user_data');
           localStorage.removeItem('user_info');
+            void Preferences.remove({ key: 'auth_token' });
+            void Preferences.remove({ key: 'user_info' });
         } catch {
           /* ignore */
         }

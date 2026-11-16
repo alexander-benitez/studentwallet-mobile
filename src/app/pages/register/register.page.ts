@@ -1,3 +1,4 @@
+import { Preferences } from '@capacitor/preferences';
 import { Component, NgZone, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -123,6 +124,7 @@ export class RegisterPage {
         const user = data.data?.user || data.user;
         if (token) {
           localStorage.setItem('auth_token', token);
+          await Preferences.set({ key: 'auth_token', value: token });
         }
         if (user) {
           localStorage.setItem('user_info', JSON.stringify(user));

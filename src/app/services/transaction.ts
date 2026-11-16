@@ -1,3 +1,4 @@
+import { Preferences } from '@capacitor/preferences';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { BehaviorSubject, of } from 'rxjs';
@@ -60,6 +61,8 @@ export class TransactionService {
     if (res.status === 401) {
       try {
         localStorage.removeItem('auth_token');
+        void Preferences.remove({ key: 'auth_token' });
+        void Preferences.remove({ key: 'user_info' });
         localStorage.removeItem('user_data');
       } catch {
         /* ignore */

@@ -64,7 +64,7 @@ export class TransactionService {
       } catch {
         /* ignore */
       }
-      void this.router.navigate(['/login'], { replaceUrl: true });
+      void this.router.navigate(['/login']);
       return true;
     }
     return false;

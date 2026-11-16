@@ -119,7 +119,7 @@ export class ResetPasswordPage {
           data.message || 'Contraseña actualizada. Redirigiendo al inicio de sesión...',
           'success'
         );
-        await this.ngZone.run(() => this.router.navigate(['/login'], { replaceUrl: true }));
+        await this.ngZone.run(() => this.router.navigate(['/login']));
       } else {
         await this.showToast(data.message || 'No se pudo restablecer la contraseña.', 'danger');
       }

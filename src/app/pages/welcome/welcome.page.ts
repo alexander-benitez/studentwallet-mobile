@@ -2,7 +2,7 @@ import { AfterViewInit, ChangeDetectorRef, Component, NgZone, inject } from '@an
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonContent, IonButton, IonIcon, ViewWillEnter } from '@ionic/angular';
+import { IonContent, IonButton, IonIcon, NavController, ViewWillEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { cardOutline, trendingUpOutline } from 'ionicons/icons';
 
@@ -17,6 +17,7 @@ export class WelcomePage implements AfterViewInit, ViewWillEnter {
   private cdr = inject(ChangeDetectorRef);
   private ngZone = inject(NgZone);
   private router = inject(Router);
+  private navController = inject(NavController);
 
   constructor() {
     addIcons({ cardOutline, trendingUpOutline });
@@ -35,10 +36,22 @@ export class WelcomePage implements AfterViewInit, ViewWillEnter {
   }
 
   goToLogin() {
-    this.router.navigateByUrl('/login', { replaceUrl: true });
+    this.ngZone.run(() => {
+      this.router.navigateByUrl('/login').then(() => {
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
+      });
+    });
   }
 
   goToRegister() {
-    this.router.navigateByUrl('/register', { replaceUrl: true });
+    this.ngZone.run(() => {
+      this.router.navigateByUrl('/register').then(() => {
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
+      });
+    });
   }
 }

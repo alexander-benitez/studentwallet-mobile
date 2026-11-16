@@ -62,15 +62,21 @@ export class RegisterPage {
 
   goBack() {
     this.ngZone.run(() => {
-      this.router.navigateByUrl('/welcome', { replaceUrl: true });
-      this.cdr.detectChanges();
+      this.router.navigateByUrl('/welcome').then(() => {
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
+      });
     });
   }
 
   goToLogin() {
     this.ngZone.run(() => {
-      this.router.navigateByUrl('/login', { replaceUrl: true });
-      this.cdr.detectChanges();
+      this.router.navigateByUrl('/login').then(() => {
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
+      });
     });
   }
 

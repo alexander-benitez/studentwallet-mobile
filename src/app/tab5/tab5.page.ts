@@ -93,7 +93,7 @@ export class Tab5Page implements OnInit {
 
       if (res.status === 401) {
         try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch { /* */ }
-        this.router.navigate(['/login'], { replaceUrl: true });
+        this.router.navigate(['/login']);
         return;
       }
 
@@ -125,7 +125,7 @@ export class Tab5Page implements OnInit {
 
       if (res.status === 401) {
         try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch { /* */ }
-        this.router.navigate(['/login'], { replaceUrl: true });
+        this.router.navigate(['/login']);
         return;
       }
 
@@ -147,6 +147,6 @@ export class Tab5Page implements OnInit {
   logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_info');
-    this.router.navigate(['/login'], { replaceUrl: true });
+    this.router.navigate(['/login']);
   }
 }

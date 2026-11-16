@@ -15,7 +15,7 @@ export const authErrorInterceptor: HttpInterceptorFn = (req, next) => {
         } catch {
           /* ignore */
         }
-        void router.navigate(['/login'], { replaceUrl: true });
+        void router.navigate(['/login']);
       }
       return throwError(() => err);
     })

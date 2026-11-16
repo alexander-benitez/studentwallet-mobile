@@ -18,7 +18,9 @@ html, body {
   justify-content: space-between;
   min-height: 100%;
   box-sizing: border-box;
-  padding: 32px 24px;
+  padding: calc(32px + env(safe-area-inset-top)) 24px 32px;
+  position: relative;
+  z-index: 1;
 }
 
 .brand-header {
@@ -47,10 +49,13 @@ html, body {
 }
 
 .hero-area {
+  flex: 1;
+  min-height: 0;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 40px 0;
+  padding: 24px 0;
+  pointer-events: none;
 
   .chart-mock {
     display: flex;
@@ -92,6 +97,9 @@ html, body {
 }
 
 .action-footer {
+  position: relative;
+  z-index: 2;
+
   h1 {
     font-size: 2rem;
     font-weight: 800;

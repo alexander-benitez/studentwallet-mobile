@@ -11,6 +11,10 @@
   --sw-text-light: #ffffff;
 }
 
+ion-header ion-toolbar:first-of-type {
+  padding-top: env(safe-area-inset-top);
+}
+
 .auth-page {
   --background: var(--sw-bg-dark);
   color: var(--sw-text-light);
@@ -89,4 +93,19 @@ ion-toast.toast-notice::part(message) {
   font-size: 1rem;
   line-height: 1.4;
   padding: 4px 0;
+}
+
+ion-router-outlet > .ion-page {
+  display: flex !important;
+  flex-direction: column !important;
+  position: relative !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  z-index: 10 !important;
+  height: 100% !important;
+}
+
+
+ion-router-outlet > .ion-page-hidden {
+  display: none !important;
 }

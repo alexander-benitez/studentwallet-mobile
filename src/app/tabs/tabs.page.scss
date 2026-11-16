@@ -3,8 +3,10 @@
   --border: 1px solid #141c2e;
   border-top: 1px solid #141c2e;
   height: 64px;
-  padding-bottom: 6px;
+  padding-bottom: env(safe-area-inset-bottom);
   overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {

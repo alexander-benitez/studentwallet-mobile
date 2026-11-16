@@ -1,7 +1,7 @@
-import { Component, inject } from '@angular/core';
+import { Component, NgZone, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { 
   IonContent, 
   IonHeader, 
@@ -16,6 +16,7 @@ import {
   eyeOutline, 
   eyeOffOutline 
 } from 'ionicons/icons';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-register',
@@ -30,8 +31,7 @@ import {
     IonIcon, 
     IonSpinner, 
     CommonModule, 
-    FormsModule, 
-    RouterLink
+    FormsModule
   ],
 })
 export class RegisterPage {
@@ -45,6 +45,8 @@ export class RegisterPage {
   isLoading: boolean = false;
 
   private router = inject(Router);
+  private ngZone = inject(NgZone);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
@@ -58,7 +60,21 @@ export class RegisterPage {
     this.showConfirmPassword = !this.showConfirmPassword;
   }
 
-  onRegister() {
+  goBack() {
+    this.ngZone.run(() => {
+      this.router.navigateByUrl('/welcome', { replaceUrl: true });
+      this.cdr.detectChanges();
+    });
+  }
+
+  goToLogin() {
+    this.ngZone.run(() => {
+      this.router.navigateByUrl('/login', { replaceUrl: true });
+      this.cdr.detectChanges();
+    });
+  }
+
+  async onRegister() {
     if (!this.name || !this.email || !this.password || !this.confirmPassword) {
       alert('Por favor completa todos los campos.');
       return;
@@ -80,10 +96,40 @@ export class RegisterPage {
     }
 
     this.isLoading = true;
+    try {
+      const response = await fetch(`${environment.apiUrl}/register`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          name: this.name.trim(),
+          email: this.email.trim(),
+          password: this.password
+        })
+      });
 
-    setTimeout(() => {
+      const data = await response.json().catch(() => ({}));
+
+      if (response.ok) {
+        const token = data.data?.token || data.token;
+        const user = data.data?.user || data.user;
+        if (token) {
+          localStorage.setItem('auth_token', token);
+        }
+        if (user) {
+          localStorage.setItem('user_info', JSON.stringify(user));
+        }
+        await this.ngZone.run(() => this.router.navigate(['/tabs/tab1'], { replaceUrl: true }));
+      } else {
+        alert(data.message || 'No se pudo completar el registro.');
+      }
+    } catch (error) {
+      console.error('Error al registrar:', error);
+      alert('No se pudo conectar con el servidor.');
+    } finally {
       this.isLoading = false;
-      this.router.navigate(['/tabs/tab1'], { replaceUrl: true });
-    }, 1500);
+    }
   }
 }

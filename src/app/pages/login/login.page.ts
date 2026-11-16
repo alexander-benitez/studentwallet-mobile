@@ -1,7 +1,7 @@
-import { Component, NgZone, inject } from '@angular/core';
+import { Component, NgZone, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import {
   IonContent,
   IonHeader,
@@ -29,8 +29,7 @@ import { environment } from '../../../environments/environment';
     IonIcon,
     IonSpinner,
     CommonModule,
-    FormsModule,
-    RouterLink
+    FormsModule
   ],
 })
 export class LoginPage {
@@ -43,9 +42,22 @@ export class LoginPage {
   private alertController = inject(AlertController);
   private toastController = inject(ToastController);
   private ngZone = inject(NgZone);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
+  }
+
+  goBack() {
+    this.router.navigateByUrl('/welcome', { replaceUrl: true });
+    this.cdr.detectChanges();
+  }
+
+  goToRegister() {
+    this.ngZone.run(() => {
+      this.router.navigateByUrl('/register', { replaceUrl: true });
+      this.cdr.detectChanges();
+    });
   }
 
   togglePasswordVisibility() {

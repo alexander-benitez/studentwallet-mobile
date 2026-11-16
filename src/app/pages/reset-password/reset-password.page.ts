@@ -48,10 +48,12 @@ export class ResetPasswordPage {
 
   constructor() {
     addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
-    const emailParam = this.route.snapshot.queryParamMap.get('email');
-    if (emailParam) {
-      this.email = emailParam;
-    }
+    this.route.queryParamMap.subscribe((params) => {
+      const emailParam = params.get('email');
+      if (emailParam) {
+        this.email = emailParam;
+      }
+    });
   }
 
   togglePassword() {

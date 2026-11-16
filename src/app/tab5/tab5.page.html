@@ -59,38 +59,6 @@
       {{ saving ? 'Guardando...' : 'Guardar cambios' }}
     </ion-button>
 
-    <div class="password-card">
-      <h3>Cambiar contraseña</h3>
-      <p>El correo de inicio de sesión no se puede cambiar desde aquí.</p>
-      <ion-list class="profile-list" lines="none">
-        <ion-item>
-          <ion-input
-            label="Nueva contraseña"
-            labelPlacement="stacked"
-            type="password"
-            [(ngModel)]="newPassword"
-            placeholder="Mínimo 6 caracteres">
-          </ion-input>
-        </ion-item>
-        <ion-item>
-          <ion-input
-            label="Confirmar contraseña"
-            labelPlacement="stacked"
-            type="password"
-            [(ngModel)]="confirmPassword"
-            placeholder="Repite la contraseña">
-          </ion-input>
-        </ion-item>
-      </ion-list>
-      <ion-button
-        expand="block"
-        class="password-button"
-        (click)="changePassword()"
-        [disabled]="changingPassword">
-        {{ changingPassword ? 'Actualizando...' : 'Actualizar contraseña' }}
-      </ion-button>
-    </div>
-
     <ion-button expand="block" class="logout-button" (click)="logout()">
       <ion-icon name="log-out-outline" slot="start"></ion-icon>
       Cerrar Sesión

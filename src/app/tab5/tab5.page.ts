@@ -56,9 +56,6 @@ export class Tab5Page implements OnInit {
 
   rol: string = 'Estudiante';
   saving: boolean = false;
-  newPassword: string = '';
-  confirmPassword: string = '';
-  changingPassword: boolean = false;
 
   private router = inject(Router);
 
@@ -132,47 +129,6 @@ export class Tab5Page implements OnInit {
       alert('Error de conexión al guardar el perfil');
     } finally {
       this.saving = false;
-    }
-  }
-
-  async changePassword(): Promise<void> {
-    const password = this.newPassword.trim();
-    const confirm = this.confirmPassword.trim();
-
-    if (!password || !confirm) {
-      alert('Completa los campos de contraseña');
-      return;
-    }
-    if (password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres');
-      return;
-    }
-    if (password !== confirm) {
-      alert('Las contraseñas no coinciden');
-      return;
-    }
-
-    this.changingPassword = true;
-    try {
-      const res = await fetch(`${environment.apiUrl}/user`, {
-        method: 'PUT',
-        headers: this.getHeaders(),
-        body: JSON.stringify({ password })
-      });
-
-      if (res.ok) {
-        this.newPassword = '';
-        this.confirmPassword = '';
-        alert('Contraseña actualizada correctamente');
-      } else {
-        const errorBody = await res.json().catch(() => null);
-        alert(errorBody?.message || 'No se pudo cambiar la contraseña');
-      }
-    } catch (err) {
-      console.error('Error al cambiar la contraseña:', err);
-      alert('Error de conexión al cambiar la contraseña');
-    } finally {
-      this.changingPassword = false;
     }
   }
 

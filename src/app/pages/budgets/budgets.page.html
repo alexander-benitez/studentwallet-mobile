@@ -7,142 +7,162 @@
 <ion-content class="budgets-content" [fullscreen]="true">
   <div class="page-wrapper">
     <div class="intro">
-      <div class="intro-icon">
-        <ion-icon name="wallet-outline"></ion-icon>
-      </div>
-      <h1>Controla tus límites</h1>
-      <p>Revisa cuánto has gastado frente al presupuesto de cada categoría.</p>
+      <div class="intro-icon"><ion-icon name="wallet-outline"></ion-icon></div>
+      <h1>Mis presupuestos</h1>
+      <p>Organiza tus gastos y mantén el control de tu dinero.</p>
     </div>
 
-    <div class="add-budget">
-      <ion-button expand="block" color="primary" (click)="abrirFormulario()">
+    <div class="month-filter" (click)="openMonthPicker()">
+      <ion-icon name="calendar-outline"></ion-icon>
+      <span>Seleccionar mes</span>
+      <div class="month-chip">{{ nombreMes(selectedMonth) }}</div>
+    </div>
+
+    <div class="summary-grid">
+      <div class="summary-card gradient-card">
+        <div class="summary-heading"><span>Total presupuestado</span><ion-icon name="wallet-outline"></ion-icon></div>
+        <h2>{{ money(totalPresupuestado) }}</h2>
+        <p>Planificado para este mes</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-heading"><span>Total gastado</span><ion-icon name="trending-down-outline" class="danger"></ion-icon></div>
+        <h2>{{ money(totalGastado) }}</h2>
+        <p>Gastos en categorías presupuestadas</p>
+      </div>
+      <div class="summary-card">
+        <div class="summary-heading"><span>Presupuesto disponible</span><ion-icon name="checkmark-circle-outline" class="success"></ion-icon></div>
+        <h2 class="success-text">{{ money(totalDisponible) }}</h2>
+        <p>Dinero restante de tus límites</p>
+      </div>
+    </div>
+
+    <div class="section-heading">
+      <h2>Presupuestos por categoría</h2>
+      <p>{{ budgets.length }} categorías configuradas para este mes</p>
+    </div>
+
+    <div class="action-row">
+      <ion-button color="primary" (click)="abrirFormulario()">
         <ion-icon slot="start" name="add-outline"></ion-icon>
         Nuevo presupuesto
       </ion-button>
     </div>
 
     @if (errorMessage) {
-      <div class="budget-error" role="alert">
-        <ion-icon name="alert-circle-outline"></ion-icon>
-        <span>{{ errorMessage }}</span>
-      </div>
-    }
-
-    @if (mostrarFormulario) {
-      <div class="budget-form">
-        <p class="field-label">Categoría</p>
-        <select [(ngModel)]="nuevaCategoriaId" name="nuevaCategoriaId" class="budget-select">
-          <option [value]="null" disabled>Selecciona una categoría</option>
-          @for (cat of categoriasDisponibles; track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
-          }
-        </select>
-
-        <p class="field-label">Límite</p>
-        <input
-          type="number"
-          [(ngModel)]="nuevoLimite"
-          name="nuevoLimite"
-          min="0.01"
-          step="0.01"
-          placeholder="0.00"
-        />
-
-        <p class="field-label">Año</p>
-        <input type="number" [(ngModel)]="nuevoAnio" name="nuevoAnio" min="2000" max="2100" />
-
-        <p class="field-label">Mes</p>
-        <input type="number" [(ngModel)]="nuevoMes" name="nuevoMes" min="1" max="12" />
-
-        <ion-button expand="block" color="primary" (click)="guardarPresupuesto()" [disabled]="guardando">
-          <ion-icon slot="start" name="checkmark-outline"></ion-icon>
-          Guardar presupuesto
-        </ion-button>
-        <ion-button expand="block" color="medium" (click)="mostrarFormulario = false">
-          Cancelar
-        </ion-button>
-      </div>
-    }
-
-    @if (!loading && currentBudgets.length > 0) {
-      <div class="summary-card">
-        <div class="summary-header">
-          <div>
-            <span class="summary-label">Gasto total del mes</span>
-            <h2>${{ totalSpent | number:'1.2-2' }} <span>/ ${{ totalLimit | number:'1.2-2' }}</span></h2>
-          </div>
-          <ion-icon name="trending-up-outline"></ion-icon>
-        </div>
-        <ion-progress-bar [value]="overallProgress" color="primary"></ion-progress-bar>
-        <span class="summary-percent">{{ (overallProgress * 100) | number:'1.0-0' }}% utilizado</span>
-      </div>
+      <div class="feedback error">{{ errorMessage }}</div>
     }
 
     @if (loading) {
-      <div class="loading-state">
-        <ion-spinner name="crescent"></ion-spinner>
-        <span>Cargando presupuestos...</span>
-      </div>
-    }
-
-    @if (!loading && currentBudgets.length === 0) {
+      <div class="loading-state"><ion-spinner name="crescent"></ion-spinner><span>Cargando presupuestos...</span></div>
+    } @else if (budgets.length === 0) {
       <div class="empty-state">
         <ion-icon name="wallet-outline"></ion-icon>
-        <p>Aún no tienes presupuestos registrados.</p>
+        <h3>Todavía no tienes presupuestos</h3>
+        <p>Crea tu primer presupuesto y empieza a controlar tus gastos.</p>
+        <ion-button color="primary" (click)="abrirFormulario()">
+          <ion-icon slot="start" name="add-outline"></ion-icon>Crear presupuesto
+        </ion-button>
       </div>
-    }
-
-    @if (!loading && currentBudgets.length > 0) {
+    } @else {
       <div class="budget-list">
-        @for (budget of currentBudgets; track budget.id) {
-          <div
-            class="budget-card"
-            [ngClass]="'alert-' + budget.alert">
-
-            <div class="budget-header">
+        @for (b of budgets; track b.id) {
+          <div class="budget-card">
+            <div class="budget-top">
               <div class="category-info">
-                <div class="category-icon">
-                  <ion-icon name="wallet-outline"></ion-icon>
-                </div>
-                <div class="category-texts">
-                  <span class="category-name">{{ getCategoryName(budget) }}</span>
-                  <span class="category-period">
-                    {{ getMonthName(budget.month) }} {{ budget.year }}
-                  </span>
+                <div class="category-icon"><ion-icon name="wallet-outline"></ion-icon></div>
+                <div>
+                  <h3>{{ getCategoryName(b) }}</h3>
+                  <span>Presupuesto mensual</span>
                 </div>
               </div>
-
-              <div class="alert-badge" [ngClass]="'alert-' + budget.alert">
-                <ion-icon [name]="getAlertIcon(budget.alert)"></ion-icon>
-                <span>{{ getAlertLabel(budget.alert) }}</span>
-              </div>
-
-              <button class="budget-delete" (click)="eliminarPresupuesto(budget.id)">
-                Eliminar
-              </button>
+              <button class="delete-btn" (click)="eliminarPresupuesto(b)"><ion-icon name="trash-outline"></ion-icon></button>
             </div>
-
             <div class="budget-amounts">
-              <span class="spent">${{ getSpent(budget) | number:'1.2-2' }}</span>
-              <span class="limit">/ ${{ getLimit(budget) | number:'1.2-2' }}</span>
+              <div><span>Gastado</span><h3>{{ money(getSpent(b)) }}</h3></div>
+              <div class="right"><span>Límite</span><h3>{{ money(getLimit(b)) }}</h3></div>
             </div>
-
-            <ion-progress-bar
-              [value]="getProgress(budget)"
-              [color]="getAlertColor(budget.alert)"
-              class="budget-progress">
-            </ion-progress-bar>
-
-            <div class="budget-footer">
-              <span class="percentage">{{ getPercentage(budget) | number:'1.0-1' }}% utilizado</span>
-              <span class="remaining">
-                {{ getSpent(budget) > getLimit(budget) ? 'Excedido' : 'Disponible' }}:
-                ${{ (getLimit(budget) - getSpent(budget) < 0 ? getSpent(budget) - getLimit(budget) : getLimit(budget) - getSpent(budget)) | number:'1.2-2' }}
-              </span>
+            <ion-progress-bar [value]="getProgress(b)" [color]="getAlertColor(b.alert, getPercentage(b))"></ion-progress-bar>
+            <div class="progress-info">
+              <span>{{ getPercentage(b) | number:'1.0-0' }}% utilizado</span>
+              <span class="chip" [ngClass]="getAlertColor(b.alert, getPercentage(b))">{{ getEstadoLabel(getPercentage(b)) }}</span>
             </div>
+            @if (getPercentage(b) >= 100) {
+              <div class="alert-box danger">Has superado tu presupuesto por {{ money(getSpent(b) - getLimit(b)) }}.</div>
+            } @else if (getPercentage(b) >= 80) {
+              <div class="alert-box warn">Estás cerca de alcanzar tu límite de gasto.</div>
+            }
+            <div class="budget-footer"><ion-icon name="wallet-outline"></ion-icon> Disponible: {{ money(getAvailable(b)) }}</div>
           </div>
         }
       </div>
     }
   </div>
+
+  <!-- Formulario nuevo presupuesto -->
+  @if (showForm) {
+    <div class="form-overlay" (click)="cerrarFormulario()"></div>
+    <div class="budget-form-sheet">
+      <div class="sheet-header">
+        <div><h3>Nuevo presupuesto</h3><p>Establece un límite mensual de gasto.</p></div>
+        <button class="close-btn" (click)="cerrarFormulario()"><ion-icon name="close-outline"></ion-icon></button>
+      </div>
+      <label class="field-label">Categoría</label>
+      <select [(ngModel)]="nuevaCategoriaId" class="form-input">
+        <option [ngValue]="null">Selecciona una categoría</option>
+        @for (c of categories; track c.id) {
+          <option [ngValue]="c.id">{{ c.name }}</option>
+        }
+      </select>
+      <label class="field-label">Límite mensual (USD)</label>
+      <input type="number" [(ngModel)]="nuevoLimite" class="form-input" min="0.01" step="0.01" placeholder="Ej. 100" />
+      <label class="field-label">Mes</label>
+      <button class="month-btn" (click)="openFormMonthPicker()">
+        <ion-icon name="calendar-outline"></ion-icon> {{ nombreMes(formMonth) }}
+      </button>
+      <div class="info-box">Si ya existe un presupuesto para esta categoría y mes, se actualizará su límite.</div>
+      <ion-button expand="block" color="primary" (click)="guardarPresupuesto()" [disabled]="guardando">
+        {{ guardando ? 'Guardando...' : 'Guardar presupuesto' }}
+      </ion-button>
+    </div>
+  }
+
+  <!-- Picker mes filtro -->
+  <ion-modal [isOpen]="showMonthPicker" (didDismiss)="showMonthPicker=false" [initialBreakpoint]="0.45" [breakpoints]="[0,0.45]">
+    <ng-template>
+      <div class="month-picker">
+        <div class="mp-header">
+          <button (click)="pickerYear = pickerYear - 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
+          <strong>{{ pickerYear }}</strong>
+          <button (click)="pickerYear = pickerYear + 1"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+        </div>
+        <div class="mp-grid">
+          @for (m of meses; track m.valor) {
+            <button class="mp-month" [class.active]="selectedMonth === pickerYear + '-' + m.valor" (click)="selectMonth(m.valor)">{{ m.nombre.slice(0,3) }}</button>
+          }
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  <!-- Picker mes form -->
+  <ion-modal [isOpen]="showFormMonthPicker" (didDismiss)="showFormMonthPicker=false" [initialBreakpoint]="0.45" [breakpoints]="[0,0.45]">
+    <ng-template>
+      <div class="month-picker">
+        <div class="mp-header">
+          <button (click)="formPickerYear = formPickerYear - 1"><ion-icon name="chevron-back-outline"></ion-icon></button>
+          <strong>{{ formPickerYear }}</strong>
+          <button (click)="formPickerYear = formPickerYear + 1"><ion-icon name="chevron-forward-outline"></ion-icon></button>
+        </div>
+        <div class="mp-grid">
+          @for (m of meses; track m.valor) {
+            <button class="mp-month" [class.active]="formMonth === formPickerYear + '-' + m.valor" (click)="selectFormMonth(m.valor)">{{ m.nombre.slice(0,3) }}</button>
+          }
+        </div>
+      </div>
+    </ng-template>
+  </ion-modal>
+
+  @if (snackbar) {
+    <div class="snack" [ngClass]="snackbarType">{{ snackbar }}</div>
+  }
 </ion-content>

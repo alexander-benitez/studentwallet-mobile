@@ -78,12 +78,8 @@ export class AddMovementModalComponent implements OnInit {
   }
 
   async ngOnInit() {
-    this.setType(this.initialType || 'gasto');
     await this.loadCategories();
-    if (!this.selectedCategoryId || !this.currentCategories.some((cat) => cat.id === this.selectedCategoryId)) {
-      const firstCategory = this.currentCategories[0];
-      this.selectedCategoryId = firstCategory ? firstCategory.id : null;
-    }
+    this.setType(this.initialType || 'gasto');
   }
 
   private async loadCategories() {

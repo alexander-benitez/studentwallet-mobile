@@ -1,10 +1,15 @@
+.goals-toolbar {
+  --background: #080d1a;
+  --color: #ffffff;
+}
+
 .goals-content {
   --background: #0b1120;
   color: #ffffff;
 }
 
 .goals-wrapper {
-  padding: 24px 16px 100px 16px;
+  padding: 16px 16px 100px 16px;
   display: flex;
   flex-direction: column;
   max-width: 440px;

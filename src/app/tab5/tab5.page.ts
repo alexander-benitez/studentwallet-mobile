@@ -1,9 +1,10 @@
 import { Preferences } from '@capacitor/preferences';
-import { Component, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
+  AlertController,
   IonContent,
   IonHeader,
   IonToolbar,
@@ -12,7 +13,8 @@ import {
   IonItem,
   IonInput,
   IonIcon,
-  IonButton
+  IonButton,
+  ViewWillEnter
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
@@ -47,7 +49,7 @@ interface Profile {
     IonButton
   ]
 })
-export class Tab5Page implements OnInit {
+export class Tab5Page implements OnInit, ViewWillEnter {
   profile: Profile = {
     name: '',
     apellido: '',
@@ -59,13 +61,41 @@ export class Tab5Page implements OnInit {
   saving: boolean = false;
 
   private router = inject(Router);
+  private alertController = inject(AlertController);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     addIcons({ logOutOutline, saveOutline });
   }
 
   ngOnInit() {
+    this.hydrateFromLocal();
     void this.loadUser();
+  }
+
+  ionViewWillEnter() {
+    this.hydrateFromLocal();
+    void this.loadUser();
+  }
+
+  private hydrateFromLocal(): void {
+    try {
+      const raw = localStorage.getItem('user_info') || localStorage.getItem('user_data');
+      if (!raw) return;
+      const u = JSON.parse(raw);
+      if (u && typeof u === 'object') {
+        this.profile = {
+          name: u.name || this.profile.name || '',
+          apellido: u.apellido || this.profile.apellido || '',
+          universidad: u.universidad || this.profile.universidad || '',
+          carrera: u.carrera || this.profile.carrera || ''
+        };
+        if (u.rol) this.rol = u.rol;
+        this.cdr.detectChanges();
+      }
+    } catch {
+      // ignorar JSON inválido
+    }
   }
 
   get nombreCompleto(): string {
@@ -100,7 +130,7 @@ export class Tab5Page implements OnInit {
 
       if (res.ok) {
         const json = await res.json();
-        const user = json.data;
+        const user = json.data ?? json;
         this.profile = {
           name: user?.name || '',
           apellido: user?.apellido || '',
@@ -108,9 +138,16 @@ export class Tab5Page implements OnInit {
           carrera: user?.carrera || ''
         };
         this.rol = user?.rol || 'Estudiante';
+        try {
+          localStorage.setItem('user_info', JSON.stringify(user));
+          await Preferences.set({ key: 'user_info', value: JSON.stringify(user) });
+        } catch { /* */ }
+        this.cdr.detectChanges();
       }
     } catch (err) {
       console.error('Error al cargar el perfil:', err);
+    } finally {
+      this.cdr.detectChanges();
     }
   }
 
@@ -131,18 +168,45 @@ export class Tab5Page implements OnInit {
       }
 
       if (res.ok) {
-        alert('Perfil actualizado correctamente');
         await this.loadUser();
+        await this.showStyledAlert(
+          'Perfil actualizado',
+          'Tus datos personales se guardaron correctamente.',
+          'success'
+        );
       } else {
         const errorBody = await res.json().catch(() => null);
-        alert(errorBody?.message || 'No se pudo actualizar el perfil');
+        await this.showStyledAlert(
+          'No se pudo guardar',
+          errorBody?.message || 'No se pudo actualizar el perfil.',
+          'danger'
+        );
       }
     } catch (err) {
       console.error('Error al guardar el perfil:', err);
-      alert('Error de conexión al guardar el perfil');
+      await this.showStyledAlert(
+        'Error de conexión',
+        'No se pudo conectar con el servidor al guardar tu perfil.',
+        'danger'
+      );
     } finally {
       this.saving = false;
+      this.cdr.detectChanges();
     }
+  }
+
+  private async showStyledAlert(
+    header: string,
+    message: string,
+    variant: 'success' | 'danger' = 'success'
+  ): Promise<void> {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      cssClass: ['sw-alert', `sw-alert-${variant}`],
+      buttons: [{ text: 'OK', role: 'confirm' }],
+    });
+    await alert.present();
   }
 
   async logout() {

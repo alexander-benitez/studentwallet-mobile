@@ -1,7 +1,8 @@
 .auth-header-bar {
   .auth-toolbar {
     --background: #080d1a;
-    padding: 8px 16px 0 16px;
+    --padding-start: 8px;
+    --padding-end: 8px;
 
     .back-link {
       display: inline-flex;

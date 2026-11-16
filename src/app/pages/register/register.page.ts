@@ -13,6 +13,7 @@ import {
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { 
+  alertCircleOutline,
   chevronBackOutline, 
   eyeOutline, 
   eyeOffOutline 
@@ -44,13 +45,15 @@ export class RegisterPage {
   showPassword: boolean = false;
   showConfirmPassword: boolean = false;
   isLoading: boolean = false;
+  errorMessage: string = '';
+  emailAlreadyInUse: boolean = false;
 
   private router = inject(Router);
   private ngZone = inject(NgZone);
   private cdr = inject(ChangeDetectorRef);
 
   constructor() {
-    addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
+    addIcons({ alertCircleOutline, chevronBackOutline, eyeOutline, eyeOffOutline });
   }
 
   togglePassword() {
@@ -82,27 +85,35 @@ export class RegisterPage {
   }
 
   async onRegister() {
-    if (!this.name || !this.email || !this.password || !this.confirmPassword) {
-      alert('Por favor completa todos los campos.');
+    this.errorMessage = '';
+    this.emailAlreadyInUse = false;
+
+    if (!this.name.trim() || !this.email.trim() || !this.password || !this.confirmPassword) {
+      this.errorMessage = 'Por favor completa todos los campos.';
+      this.cdr.detectChanges();
       return;
     }
 
     if (!this.email.trim().toLowerCase().endsWith('@gmail.com')) {
-      alert('El correo debe terminar en @gmail.com.');
+      this.errorMessage = 'El correo debe terminar en @gmail.com.';
+      this.cdr.detectChanges();
       return;
     }
 
     if (this.password.length < 6) {
-      alert('La contraseña debe tener al menos 6 caracteres.');
+      this.errorMessage = 'La contraseña debe tener al menos 6 caracteres.';
+      this.cdr.detectChanges();
       return;
     }
 
     if (this.password !== this.confirmPassword) {
-      alert('Las contraseñas no coinciden.');
+      this.errorMessage = 'Las contraseñas no coinciden.';
+      this.cdr.detectChanges();
       return;
     }
 
     this.isLoading = true;
+    this.cdr.detectChanges();
     try {
       const response = await fetch(`${environment.apiUrl}/register`, {
         method: 'POST',
@@ -131,13 +142,26 @@ export class RegisterPage {
         }
         await this.ngZone.run(() => this.router.navigate(['/tabs/tab1'], { replaceUrl: true }));
       } else {
-        alert(data.message || 'No se pudo completar el registro.');
+        const emailErrors = Array.isArray(data?.errors?.email) ? data.errors.email.join(' ') : '';
+        const rawMsg = `${data?.message || ''} ${emailErrors}`.toLowerCase();
+        if (
+          rawMsg.includes('ya está en uso') ||
+          rawMsg.includes('ya existe') ||
+          rawMsg.includes('already been taken') ||
+          rawMsg.includes('duplicate')
+        ) {
+          this.emailAlreadyInUse = true;
+          this.errorMessage = 'Este correo ya está en uso. Inicia sesión con tu cuenta.';
+        } else {
+          this.errorMessage = data.message || 'No se pudo completar el registro.';
+        }
       }
     } catch (error) {
       console.error('Error al registrar:', error);
-      alert('No se pudo conectar con el servidor.');
+      this.errorMessage = 'No se pudo conectar con el servidor. Intenta de nuevo.';
     } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 }

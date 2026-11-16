@@ -1,3 +1,8 @@
+.stats-toolbar {
+  --background: #080d1a;
+  --color: #ffffff;
+}
+
 .statistics-content {
   --background: #0b132b;
   color: #e2e8f0;
@@ -7,7 +12,7 @@
     margin: 0.25rem 0 1rem;
     padding: 0 0.15rem;
     .title-main {
-      font-size: clamp(1.35rem, 4.5vw, 1.75rem);
+      font-size: 1.35rem;
       font-weight: 800;
       margin: 0;
       color: #f8fafc;

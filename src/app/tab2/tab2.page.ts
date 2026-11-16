@@ -2,7 +2,10 @@ import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angula
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { 
-  IonContent, 
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
   IonIcon, 
   IonFab, 
   IonFabButton, 
@@ -30,7 +33,7 @@ import { TransactionService, Movement } from '../services/transaction';
   templateUrl: 'tab2.page.html',
   styleUrls: ['tab2.page.scss'],
   standalone: true,
-  imports: [IonContent, IonIcon, IonFab, IonFabButton, CommonModule, FormsModule, DecimalPipe],
+  imports: [IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, IonFab, IonFabButton, CommonModule, FormsModule, DecimalPipe],
   providers: [ModalController],
 })
 export class Tab2Page implements OnInit, OnDestroy, ViewWillEnter {

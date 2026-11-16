@@ -14,7 +14,7 @@ import {
   ToastController
 } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { chevronBackOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
+import { alertCircleOutline, chevronBackOutline, eyeOutline, eyeOffOutline } from 'ionicons/icons';
 import { environment } from '../../../environments/environment';
 
 @Component({
@@ -38,6 +38,7 @@ export class LoginPage {
   password: string = '';
   showPassword: boolean = false;
   isLoading: boolean = false;
+  errorMessage: string = '';
 
   private router = inject(Router);
   private alertController = inject(AlertController);
@@ -46,7 +47,7 @@ export class LoginPage {
   private cdr = inject(ChangeDetectorRef);
 
   constructor() {
-    addIcons({ chevronBackOutline, eyeOutline, eyeOffOutline });
+    addIcons({ alertCircleOutline, chevronBackOutline, eyeOutline, eyeOffOutline });
   }
 
   goBack() {
@@ -74,12 +75,21 @@ export class LoginPage {
   }
 
   async onLogin() {
-    if (!this.email || !this.password) {
-      await this.showToast('Por favor ingresa tu correo y contraseña', 'danger');
+    this.errorMessage = '';
+    if (!this.email.trim() || !this.password.trim()) {
+      this.errorMessage = 'Por favor ingresa tu correo y contraseña.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (!this.email.trim().toLowerCase().endsWith('@gmail.com')) {
+      this.errorMessage = 'El correo debe terminar en @gmail.com (no se admiten otros dominios).';
+      this.cdr.detectChanges();
       return;
     }
 
     this.isLoading = true;
+    this.cdr.detectChanges();
     try {
       const response = await fetch(`${environment.apiUrl}/login`, {
         method: 'POST',
@@ -109,15 +119,27 @@ export class LoginPage {
           await Preferences.set({ key: 'user_info', value: JSON.stringify(user) });
         }
 
-        await this.ngZone.run(() => this.router.navigate(['/tabs/tab1'], { replaceUrl: true }));
+        await this.ngZone.run(() =>
+          this.router.navigateByUrl('/tabs/tab1', { replaceUrl: true }).then(() => {
+            setTimeout(() => this.cdr.detectChanges(), 50);
+          })
+        );
       } else {
-        await this.showToast(data.message || 'Credenciales incorrectas', 'danger');
+        const rawMsg = String(data?.message || '').toLowerCase();
+        if (response.status === 429 || rawMsg.includes('too many') || rawMsg.includes('many attempts')) {
+          this.errorMessage = 'Demasiados intentos fallidos. Por seguridad, espera un momento antes de volver a intentarlo.';
+        } else if (response.status === 401) {
+          this.errorMessage = 'Correo o contraseña incorrectos.';
+        } else {
+          this.errorMessage = data.message || 'Correo o contraseña incorrectos.';
+        }
       }
     } catch (error) {
       console.error('Error al conectar con la API:', error);
-      await this.showToast('No se pudo conectar con el servidor', 'danger');
+      this.errorMessage = 'No se pudo conectar con el servidor. Intenta de nuevo.';
     } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -131,7 +153,7 @@ export class LoginPage {
         {
           name: 'email',
           type: 'email',
-          placeholder: 'tu@correo.com',
+          placeholder: 'usuario@gmail.com',
           value: this.email?.trim() || ''
         }
       ],

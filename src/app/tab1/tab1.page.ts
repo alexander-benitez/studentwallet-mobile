@@ -2,7 +2,10 @@ import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angula
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { 
-  IonContent, 
+  IonHeader,
+  IonToolbar,
+  IonTitle,
+  IonContent,
   IonProgressBar, 
   IonIcon, 
   IonFab, 
@@ -37,7 +40,10 @@ import { TransactionService, Movement, Goal } from '../services/transaction';
   styleUrls: ['tab1.page.scss'],
   standalone: true,
   imports: [
-    IonContent, 
+    IonHeader,
+    IonToolbar,
+    IonTitle,
+    IonContent,
     IonProgressBar, 
     IonIcon, 
     IonFab, 

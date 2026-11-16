@@ -1,7 +1,7 @@
 import { Component, OnInit, OnDestroy, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonProgressBar, IonFab, IonFabButton, IonIcon, ViewWillEnter } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonProgressBar, IonFab, IonFabButton, IonIcon, ViewWillEnter } from '@ionic/angular';
 import { add } from 'ionicons/icons';
 import { addIcons } from 'ionicons';
 import { Subscription } from 'rxjs';
@@ -12,7 +12,7 @@ import { TransactionService, Goal } from '../services/transaction';
   templateUrl: 'tab3.page.html',
   styleUrls: ['tab3.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonContent, IonProgressBar, IonFab, IonFabButton, IonIcon]
+  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonProgressBar, IonFab, IonFabButton, IonIcon]
 })
 export class Tab3Page implements OnInit, OnDestroy, ViewWillEnter {
   goals: Goal[] = [];

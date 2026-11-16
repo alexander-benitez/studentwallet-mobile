@@ -28,7 +28,8 @@ ion-modal::part(content) {
   background: #0d1527;
 }
 
-.forgot-password-alert {
+.forgot-password-alert,
+.sw-alert {
   --backdrop-opacity: 0.6;
 
   .alert-wrapper {
@@ -93,6 +94,59 @@ ion-toast.toast-notice::part(message) {
   font-size: 1rem;
   line-height: 1.4;
   padding: 4px 0;
+}
+
+.sw-alert.sw-alert-success .alert-wrapper {
+  border-color: rgba(16, 185, 129, 0.4);
+}
+
+.sw-alert.sw-alert-danger .alert-wrapper {
+  border-color: rgba(239, 68, 68, 0.45);
+}
+
+.sw-alert .alert-message {
+  font-size: 0.94rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.sw-inline-feedback {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sw-inline-feedback .feedback-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.sw-inline-feedback ion-icon {
+  font-size: 1.15rem;
+  color: #f87171;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.sw-inline-feedback .feedback-action {
+  align-self: flex-start;
+  background: rgba(43, 102, 246, 0.18);
+  border: 1px solid rgba(43, 102, 246, 0.45);
+  color: #93c5fd;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 ion-router-outlet > .ion-page {

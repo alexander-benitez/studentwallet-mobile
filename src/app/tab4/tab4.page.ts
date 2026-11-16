@@ -1,7 +1,7 @@
 import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { IonContent, IonIcon, IonFab, IonFabButton, ModalController, ViewWillEnter } from '@ionic/angular';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, IonFab, IonFabButton, ModalController, ViewWillEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import { barChartOutline, add, addOutline, fastFoodOutline, busOutline, bookOutline, gameControllerOutline, homeOutline, calendarOutline, trendingUpOutline, trendingDownOutline, walletOutline } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
@@ -29,7 +29,7 @@ interface MonthlyStat {
   templateUrl: './tab4.page.html',
   styleUrls: ['./tab4.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule, IonContent, IonIcon, IonFab, IonFabButton]
+  imports: [CommonModule, FormsModule, IonHeader, IonToolbar, IonTitle, IonContent, IonIcon, IonFab, IonFabButton]
 })
 export class Tab4Page implements OnInit, OnDestroy, ViewWillEnter {
   movements: Movement[] = [];

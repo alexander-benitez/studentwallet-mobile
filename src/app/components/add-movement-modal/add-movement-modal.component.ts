@@ -1,8 +1,8 @@
-import { Component, Input, OnInit, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { IonIcon, ModalController } from '@ionic/angular';
+import { AlertController, IonIcon, ModalController } from '@ionic/angular';
 import { addIcons } from 'ionicons';
 import {
   briefcaseOutline,
@@ -52,10 +52,13 @@ export class AddMovementModalComponent implements OnInit {
   description: string = '';
   concepto: string = '';
   categories: Category[] = [];
+  isLoadingCategories = true;
 
   private modalCtrl = inject(ModalController);
+  private alertCtrl = inject(AlertController);
   private transactionService = inject(TransactionService);
   private router = inject(Router);
+  private cdr = inject(ChangeDetectorRef);
 
   constructor() {
     addIcons({
@@ -80,17 +83,23 @@ export class AddMovementModalComponent implements OnInit {
   async ngOnInit() {
     await this.loadCategories();
     this.setType(this.initialType || 'gasto');
+    this.cdr.detectChanges();
   }
 
   private async loadCategories() {
-    const categories = await this.transactionService.getCategories();
-    this.categories = categories.map((cat: any) => ({
-      id: Number(cat.id),
-      name: cat.name,
-      type: cat.type,
-      icon: toIonicon(cat.icon),
-      color: cat.color || DEFAULT_CATEGORY_COLOR,
-    }));
+    this.isLoadingCategories = true;
+    try {
+      const categories = await this.transactionService.getCategories();
+      this.categories = categories.map((cat: any) => ({
+        id: Number(cat.id),
+        name: cat.name,
+        type: cat.type,
+        icon: toIonicon(cat.icon),
+        color: cat.color || DEFAULT_CATEGORY_COLOR,
+      }));
+    } finally {
+      this.isLoadingCategories = false;
+    }
   }
 
   get currentCategories(): Category[] {
@@ -124,14 +133,24 @@ export class AddMovementModalComponent implements OnInit {
     await this.router.navigate(['/tabs/categories']);
   }
 
-  save() {
+  private async showValidationAlert(message: string) {
+    const alert = await this.alertCtrl.create({
+      header: 'Dato requerido',
+      message,
+      cssClass: ['sw-alert', 'sw-alert-danger'],
+      buttons: [{ text: 'OK', role: 'confirm' }],
+    });
+    await alert.present();
+  }
+
+  async save() {
     if (!this.amount || this.amount <= 0) {
-      alert('Ingresa un monto válido mayor a 0');
+      await this.showValidationAlert('Ingresa un monto válido mayor a 0.');
       return;
     }
 
     if (!this.selectedCategoryId) {
-      alert('Debes seleccionar una categoría');
+      await this.showValidationAlert('Debes seleccionar una categoría.');
       return;
     }
 

@@ -12,7 +12,7 @@
     <!-- Título y subtítulo -->
     <div class="auth-header">
       <h2>Inicia sesión</h2>
-      <p>Qué bueno verte de nuevo.</p>
+      <p>Qué bueno verte de nuevo. Usa tu correo @gmail.com (no se admiten otros dominios).</p>
     </div>
 
     <!-- Formulario -->
@@ -25,7 +25,7 @@
             type="email" 
             [(ngModel)]="email" 
             name="email" 
-            placeholder="tu@correo.com" 
+            placeholder="usuario@gmail.com" 
             required 
           />
         </div>
@@ -66,6 +66,15 @@
           <span>Iniciar sesión</span>
         }
       </ion-button>
+
+        @if (errorMessage) {
+          <div class="sw-inline-feedback" role="alert">
+            <div class="feedback-row">
+              <ion-icon name="alert-circle-outline"></ion-icon>
+              <span>{{ errorMessage }}</span>
+            </div>
+          </div>
+        }
     </form>
 
     <!-- Enlace inferior -->

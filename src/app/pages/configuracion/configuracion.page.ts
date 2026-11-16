@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import {
+  AlertController,
   IonButton,
   IonContent,
   IonHeader,
@@ -27,6 +28,9 @@ import {
   swapHorizontalOutline,
   walletOutline,
 } from 'ionicons/icons';
+import { Capacitor } from '@capacitor/core';
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import { LocalNotifications } from '@capacitor/local-notifications';
 import { jsPDF } from 'jspdf';
 import { environment } from '../../../environments/environment';
 import { TransactionService } from '../../services/transaction';
@@ -71,6 +75,7 @@ export class ConfiguracionPage implements OnInit, ViewWillEnter {
   preferences: Preferences = { ...DEFAULT_PREFERENCES };
 
   private router = inject(Router);
+  private alertController = inject(AlertController);
   private transactionService = inject(TransactionService);
 
   constructor() {
@@ -145,7 +150,7 @@ export class ConfiguracionPage implements OnInit, ViewWillEnter {
     }
   }
 
-  private async generateBackupPdf(data: any): Promise<void> {
+  private async generateBackupPdf(data: any): Promise<string> {
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const margin = 40;
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -241,7 +246,60 @@ export class ConfiguracionPage implements OnInit, ViewWillEnter {
       });
     }
 
-    doc.save(`studentwallet-respaldo-${new Date().toISOString().slice(0, 10)}.pdf`);
+    const fileName = `studentwallet-respaldo-${new Date().toISOString().slice(0, 10)}.pdf`;
+
+    if (Capacitor.isNativePlatform()) {
+      const dataUri = doc.output('datauristring');
+      const base64Data = dataUri.split(',')[1];
+      await Filesystem.writeFile({
+        path: `Download/${fileName}`,
+        data: base64Data,
+        directory: Directory.ExternalStorage,
+        recursive: true,
+      });
+      return fileName;
+    }
+
+    doc.save(fileName);
+    return fileName;
+  }
+
+  private async notifyPdfCreated(fileName: string): Promise<void> {
+    if (!Capacitor.isNativePlatform() || !this.preferences.notificaciones) {
+      return;
+    }
+
+    try {
+      let perm = await LocalNotifications.checkPermissions();
+      if (perm.display !== 'granted') {
+        perm = await LocalNotifications.requestPermissions();
+      }
+      if (perm.display !== 'granted') {
+        return;
+      }
+
+      await LocalNotifications.createChannel({
+        id: 'studentwallet_backups',
+        name: 'Respaldos y alertas',
+        description: 'Notificaciones de exportación de respaldos PDF',
+        importance: 4,
+        visibility: 1,
+      }).catch(() => {});
+
+      await LocalNotifications.schedule({
+        notifications: [
+          {
+            id: Math.floor(Date.now() % 2147483647),
+            title: 'Respaldo PDF generado',
+            body: `Se guardó en Descargas: ${fileName}`,
+            channelId: 'studentwallet_backups',
+            schedule: { at: new Date(Date.now() + 1000) },
+          },
+        ],
+      });
+    } catch (err) {
+      console.warn('No se pudo mostrar la notificación local:', err);
+    }
   }
 
   private loadImageAsDataUrl(path: string): Promise<string> {
@@ -265,13 +323,31 @@ export class ConfiguracionPage implements OnInit, ViewWillEnter {
     });
   }
 
-  resetPreferences(): void {
+  async resetPreferences(): Promise<void> {
     this.preferences = { ...DEFAULT_PREFERENCES };
     localStorage.setItem(
       ConfiguracionPage.STORAGE_KEY,
       JSON.stringify(this.preferences)
     );
-    alert('Configuración restablecida correctamente');
+    await this.showStyledAlert(
+      'Configuración restablecida',
+      'Tus preferencias generales volvieron a sus valores predeterminados.',
+      'success'
+    );
+  }
+
+  private async showStyledAlert(
+    header: string,
+    message: string,
+    variant: 'success' | 'danger' = 'success'
+  ): Promise<void> {
+    const alert = await this.alertController.create({
+      header,
+      message,
+      cssClass: ['sw-alert', `sw-alert-${variant}`],
+      buttons: [{ text: 'OK', role: 'confirm' }],
+    });
+    await alert.present();
   }
 
   goToProfile(): void {

@@ -1,4 +1,5 @@
 import { Component, NgZone, ChangeDetectorRef, inject } from '@angular/core';
+import { Preferences } from '@capacitor/preferences';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -49,14 +50,22 @@ export class LoginPage {
   }
 
   goBack() {
-    this.router.navigateByUrl('/welcome', { replaceUrl: true });
-    this.cdr.detectChanges();
+    this.ngZone.run(() => {
+      this.router.navigateByUrl('/welcome').then(() => {
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
+      });
+    });
   }
 
   goToRegister() {
     this.ngZone.run(() => {
-      this.router.navigateByUrl('/register', { replaceUrl: true });
-      this.cdr.detectChanges();
+      this.router.navigateByUrl('/register').then(() => {
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
+      });
     });
   }
 
@@ -93,9 +102,11 @@ export class LoginPage {
 
         if (token) {
           localStorage.setItem('auth_token', token);
+          await Preferences.set({ key: 'auth_token', value: token });
         }
         if (user) {
           localStorage.setItem('user_info', JSON.stringify(user));
+          await Preferences.set({ key: 'user_info', value: JSON.stringify(user) });
         }
 
         await this.ngZone.run(() => this.router.navigate(['/tabs/tab1'], { replaceUrl: true }));

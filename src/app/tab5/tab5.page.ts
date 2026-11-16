@@ -1,3 +1,4 @@
+import { Preferences } from '@capacitor/preferences';
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -92,8 +93,8 @@ export class Tab5Page implements OnInit {
       });
 
       if (res.status === 401) {
-        try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch { /* */ }
-        this.router.navigate(['/login'], { replaceUrl: true });
+        try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); localStorage.removeItem('user_info'); await Preferences.remove({ key: 'auth_token' }); await Preferences.remove({ key: 'user_info' }); } catch { /* */ }
+        this.router.navigate(['/login']);
         return;
       }
 
@@ -124,8 +125,8 @@ export class Tab5Page implements OnInit {
       });
 
       if (res.status === 401) {
-        try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch { /* */ }
-        this.router.navigate(['/login'], { replaceUrl: true });
+        try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); localStorage.removeItem('user_info'); await Preferences.remove({ key: 'auth_token' }); await Preferences.remove({ key: 'user_info' }); } catch { /* */ }
+        this.router.navigate(['/login']);
         return;
       }
 
@@ -144,9 +145,11 @@ export class Tab5Page implements OnInit {
     }
   }
 
-  logout() {
+  async logout() {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user_info');
+    await Preferences.remove({ key: 'auth_token' });
+    await Preferences.remove({ key: 'user_info' });
     this.router.navigate(['/login'], { replaceUrl: true });
   }
 }

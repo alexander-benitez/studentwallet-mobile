@@ -1,3 +1,4 @@
+import { Preferences } from '@capacitor/preferences';
 import { Component, NgZone, ChangeDetectorRef, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -62,15 +63,21 @@ export class RegisterPage {
 
   goBack() {
     this.ngZone.run(() => {
-      this.router.navigateByUrl('/welcome', { replaceUrl: true });
-      this.cdr.detectChanges();
+      this.router.navigateByUrl('/welcome').then(() => {
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
+      });
     });
   }
 
   goToLogin() {
     this.ngZone.run(() => {
-      this.router.navigateByUrl('/login', { replaceUrl: true });
-      this.cdr.detectChanges();
+      this.router.navigateByUrl('/login').then(() => {
+        setTimeout(() => {
+          this.cdr.detectChanges();
+        }, 100);
+      });
     });
   }
 
@@ -117,6 +124,7 @@ export class RegisterPage {
         const user = data.data?.user || data.user;
         if (token) {
           localStorage.setItem('auth_token', token);
+          await Preferences.set({ key: 'auth_token', value: token });
         }
         if (user) {
           localStorage.setItem('user_info', JSON.stringify(user));

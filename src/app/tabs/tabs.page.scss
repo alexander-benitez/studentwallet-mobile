@@ -3,8 +3,14 @@
   --border: 1px solid #141c2e;
   border-top: 1px solid #141c2e;
   height: 64px;
-  padding-bottom: 6px;
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
   overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  flex-shrink: 0;
   scrollbar-width: none;
 
   &::-webkit-scrollbar {
@@ -15,9 +21,10 @@
     --color: #64748b;
     --color-selected: #2b66f6;
     background: transparent;
-    flex: 0 0 88px;
-    min-width: 88px;
-    width: 88px;
+    flex: 0 0 84px;
+    min-width: 84px;
+    max-width: 84px;
+    width: 84px;
 
     ion-icon {
       font-size: 1.3rem;
@@ -27,6 +34,7 @@
     ion-label {
       font-size: 0.72rem;
       font-weight: 500;
+      white-space: nowrap;
     }
   }
 }

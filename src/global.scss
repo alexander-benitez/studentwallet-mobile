@@ -77,3 +77,16 @@ ion-modal::part(content) {
     color: #94a3b8;
   }
 }
+
+ion-toast.toast-notice {
+  --border-radius: 14px;
+  --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+ion-toast.toast-notice::part(message) {
+  font-size: 1rem;
+  line-height: 1.4;
+  padding: 4px 0;
+}

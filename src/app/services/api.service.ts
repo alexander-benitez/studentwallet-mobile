@@ -96,11 +96,13 @@ export class ApiService {
     );
   }
 
-  getBudgets(): Observable<ApiResponse<Budget[]>> {
-    return this.http.get<ApiResponse<Budget[]>>(
-      `${this.apiUrl}/budgets`,
-      { headers: this.getHeaders() }
-    );
+  getBudgets(month?: number, year?: number): Observable<ApiResponse<Budget[]>> {
+    let url = `${this.apiUrl}/budgets`;
+    const params: string[] = [];
+    if (month != null) params.push(`month=${month}`);
+    if (year != null) params.push(`year=${year}`);
+    if (params.length) url += `?${params.join('&')}`;
+    return this.http.get<ApiResponse<Budget[]>>(url, { headers: this.getHeaders() });
   }
 
   createBudget(data: {

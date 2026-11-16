@@ -1,41 +1,90 @@
 <ion-content class="ion-padding statistics-content">
-  <!-- Cabecera -->
   <div class="header-container">
-    <h2>Estadísticas Financieras</h2>
-    <p class="subtitle">Resumen de tus ingresos y gastos</p>
+    <h1 class="title-main">Estadísticas financieras</h1>
+    <p class="subtitle">Analiza tus ingresos, gastos y hábitos financieros.</p>
   </div>
 
-  <!-- 3 Tarjetas de Resumen (Ingresos, Gastos, Ahorro) -->
   <div class="summary-cards-grid">
-    <div class="summary-card">
-      <span class="card-label">Recibí</span>
-      <span class="card-value income">${{ totalIncome | number:'1.2-2' }}</span>
+    <div class="summary-card card-income">
+      <div class="card-top">
+        <ion-icon name="trending-up-outline" class="icon-top success"></ion-icon>
+      </div>
+      <p class="card-label">Total de ingresos</p>
+      <h2 class="card-value income">${{ totalIncome | number:'1.2-2' }}</h2>
     </div>
-    <div class="summary-card">
-      <span class="card-label">Gasté</span>
-      <span class="card-value expense">${{ totalExpense | number:'1.2-2' }}</span>
+    <div class="summary-card card-expense">
+      <div class="card-top">
+        <ion-icon name="trending-down-outline" class="icon-top error"></ion-icon>
+      </div>
+      <p class="card-label">Total de gastos</p>
+      <h2 class="card-value expense">${{ totalExpense | number:'1.2-2' }}</h2>
     </div>
-    <div class="summary-card">
-      <span class="card-label">Ahorro</span>
-      <span class="card-value savings">${{ totalSavings | number:'1.2-2' }}</span>
+    <div class="summary-card card-savings balance-card">
+      <div class="card-top">
+        <ion-icon name="wallet-outline" class="icon-top balance"></ion-icon>
+      </div>
+      <p class="card-label">Balance disponible</p>
+      <h2 class="card-value savings" [class.negative]="totalSavings < 0">${{ totalSavings | number:'1.2-2' }}</h2>
     </div>
   </div>
 
-  <!-- Gastos por Categoría -->
-  <div class="section-block">
-    <h3>Gastos por Categoría</h3>
+  <div class="charts-header">
+    <div>
+      <h2 class="section-title-lg">Análisis de movimientos</h2>
+      <p class="section-desc">Visualiza cómo evolucionan tus finanzas.</p>
+    </div>
+    <div class="year-selector">
+      <ion-icon name="calendar-outline" color="primary"></ion-icon>
+      <input type="number" [(ngModel)]="anioSeleccionado" (ngModelChange)="onYearChange()" min="2000" max="2100" />
+    </div>
+  </div>
 
-    @if (categoryStats.length > 0) {
-      <div class="main-card">
+  <div class="section-block">
+    <div class="chart-card chart-card-main">
+      <div class="chart-heading">
+        <div>
+          <h3>Ingresos vs. gastos</h3>
+          <p class="chart-sub">Comparación mensual de tus movimientos</p>
+        </div>
+        <ion-icon name="bar-chart-outline" class="chart-heading-icon"></ion-icon>
+      </div>
+      <div class="chart-container bars-container-v2">
+        @for (stat of monthlyStats; track stat.monthName) {
+          <div class="bar-group">
+            <div class="bars-pair">
+              <div class="bar income-bar" [style.height.px]="stat.maxHeightIncome" [title]="'Ingresos: $' + (stat.income | number:'1.2-2')"></div>
+              <div class="bar expense-bar" [style.height.px]="stat.maxHeightExpense" [title]="'Gastos: $' + (stat.expense | number:'1.2-2')"></div>
+            </div>
+            <span class="bar-label">{{ stat.monthName }}</span>
+          </div>
+        }
+      </div>
+      <div class="chart-legend">
+        <span class="legend-item"><span class="dot income-dot"></span> Ingresos</span>
+        <span class="legend-item"><span class="dot expense-dot"></span> Gastos</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-block">
+    <div class="chart-card chart-card-main">
+      <div class="chart-heading">
+        <div>
+          <h3>Gastos por categoría</h3>
+          <p class="chart-sub">Distribución de tu dinero ({{ anioSeleccionado }})</p>
+        </div>
+        <ion-icon name="bar-chart-outline" class="chart-heading-icon"></ion-icon>
+      </div>
+
+      @if (categoryStats.length > 0) {
         <div class="multi-progress-bar">
           @for (cat of categoryStats; track cat.name) {
             <div [style.width.%]="cat.percentage" [style.background-color]="cat.color"></div>
           }
         </div>
         <p class="insight-text">
-          {{ categoryStats[0]?.name }} es tu mayor gasto: <strong>${{ categoryStats[0]?.amount }}</strong>.
+          <strong>{{ categoryStats[0]?.name }}</strong> concentra el mayor gasto: <strong>${{ categoryStats[0]?.amount | number:'1.2-2' }}</strong>.
         </p>
-
         <div class="category-rows">
           @for (cat of categoryStats; track cat.name) {
             <div class="cat-row">
@@ -45,66 +94,24 @@
                 </div>
                 <div class="cat-titles">
                   <span class="cat-title">{{ cat.name }}</span>
-                  <span class="cat-sub" [style.color]="cat.color">● {{ cat.percentage | number:'1.0-0' }}% de tus gastos</span>
+                  <span class="cat-sub" [style.color]="cat.color">{{ cat.percentage | number:'1.0-0' }}% de tus gastos</span>
                 </div>
               </div>
-              <span class="cat-price">${{ cat.amount }}</span>
+              <span class="cat-price">${{ cat.amount | number:'1.2-2' }}</span>
             </div>
           }
         </div>
-      </div>
-    }
-
-    <!-- Mensaje si no hay movimientos -->
-    @if (categoryStats.length === 0) {
-      <div class="main-card empty-card">
-        <p class="empty-text">No hay suficientes movimientos para mostrar estadísticas todavía.</p>
-      </div>
-    }
+      } @else {
+        <div class="chart-empty">
+          <ion-icon name="bar-chart-outline" class="empty-icon-lg"></ion-icon>
+          <p>No hay gastos registrados para este año.</p>
+        </div>
+      }
+    </div>
   </div>
 
-  <!-- Gráfica de Ingresos vs Gastos -->
-  @if (monthlyStats.length > 0) {
-    <div class="section-block">
-      <h3>Ingresos vs gastos</h3>
-      <div class="main-card chart-card">
-        <div class="bars-container">
-          @for (stat of monthlyStats; track stat.monthName) {
-            <div class="bar-group">
-              <div class="bars-pair">
-                <div class="bar income-bar" [style.height.px]="stat.maxHeightIncome"></div>
-                <div class="bar expense-bar" [style.height.px]="stat.maxHeightExpense"></div>
-              </div>
-              <span class="bar-label">{{ stat.monthName }}</span>
-            </div>
-          }
-        </div>
-        <div class="chart-legend">
-          <span class="legend-item"><span class="dot income-dot"></span> Ingresos</span>
-          <span class="legend-item"><span class="dot expense-dot"></span> Gastos</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Evolución del ahorro -->
-    <div class="section-block">
-      <h3>Evolución del ahorro</h3>
-      <div class="main-card savings-chart-card">
-        <div class="trend-line-container">
-          <svg viewBox="0 0 300 100" class="trend-svg">
-            <path [attr.d]="savingsPoints" fill="none" stroke="#8b5cf6" stroke-width="3" />
-            @for (m of monthlyStats; track m.monthName; let i = $index) {
-              <circle [attr.cx]="15 + (i * 68)" [attr.cy]="50" r="5" fill="#8b5cf6" />
-            }
-          </svg>
-        </div>
-      </div>
-    </div>
-  }
-
-  <!-- Botón flotante morado con el signo + asegurado -->
-<ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fab-purple-container">
-    <ion-fab-button (click)="openAddMovement()" class="fab-purple-btn">
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed" class="fab-purple-container">
+    <ion-fab-button (click)="openAddMovement()" class="fab-purple-btn" aria-label="Agregar movimiento">
       <ion-icon name="add-outline"></ion-icon>
     </ion-fab-button>
   </ion-fab>

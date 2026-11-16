@@ -1,8 +1,9 @@
 import { ChangeDetectorRef, Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { IonContent, IonIcon, IonFab, IonFabButton, ModalController, ViewWillEnter } from '@ionic/angular';
 import { addIcons } from 'ionicons';
-import { barChartOutline, add, addOutline, fastFoodOutline, busOutline, bookOutline, gameControllerOutline, homeOutline } from 'ionicons/icons';
+import { barChartOutline, add, addOutline, fastFoodOutline, busOutline, bookOutline, gameControllerOutline, homeOutline, calendarOutline, trendingUpOutline, trendingDownOutline, walletOutline } from 'ionicons/icons';
 import { Subscription } from 'rxjs';
 import { TransactionService, Movement } from '../services/transaction';
 import { AddMovementModalComponent } from '../components/add-movement-modal/add-movement-modal.component';
@@ -28,17 +29,18 @@ interface MonthlyStat {
   templateUrl: './tab4.page.html',
   styleUrls: ['./tab4.page.scss'],
   standalone: true,
-  imports: [CommonModule, IonContent, IonIcon, IonFab, IonFabButton]
+  imports: [CommonModule, FormsModule, IonContent, IonIcon, IonFab, IonFabButton]
 })
 export class Tab4Page implements OnInit, OnDestroy, ViewWillEnter {
   movements: Movement[] = [];
+  anioSeleccionado = new Date().getFullYear();
+
   totalIncome = 0;
   totalExpense = 0;
   totalSavings = 0;
-  
+
   categoryStats: CategoryStat[] = [];
   monthlyStats: MonthlyStat[] = [];
-  savingsPoints: string = '';
   Math = Math;
 
   private sub!: Subscription;
@@ -47,12 +49,12 @@ export class Tab4Page implements OnInit, OnDestroy, ViewWillEnter {
   private cdr = inject(ChangeDetectorRef);
 
   constructor() {
-    addIcons({ barChartOutline, add, addOutline, fastFoodOutline, busOutline, bookOutline, gameControllerOutline, homeOutline });
+    addIcons({ barChartOutline, add, addOutline, fastFoodOutline, busOutline, bookOutline, gameControllerOutline, homeOutline, calendarOutline, trendingUpOutline, trendingDownOutline, walletOutline });
   }
 
   ngOnInit() {
     this.sub = this.transactionService.movements$.subscribe(data => {
-      this.movements = data;
+      this.movements = data ?? [];
       this.calculateDynamicStats();
       this.cdr.detectChanges();
     });
@@ -68,45 +70,52 @@ export class Tab4Page implements OnInit, OnDestroy, ViewWillEnter {
     }
   }
 
-  calculateDynamicStats() {
-    const currentMonthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
-    const monthMovements = this.movements.filter(m => (m.date ?? '').startsWith(currentMonthKey));
+  onYearChange(): void {
+    this.calculateDynamicStats();
+    this.cdr.detectChanges();
+  }
 
-    this.totalIncome = monthMovements
+  calculateDynamicStats() {
+    const year = this.anioSeleccionado;
+
+    this.totalIncome = this.movements
       .filter(m => !m.isExpense)
       .reduce((sum, m) => sum + Math.abs(m.amount), 0);
 
-    this.totalExpense = monthMovements
+    this.totalExpense = this.movements
       .filter(m => m.isExpense)
       .reduce((sum, m) => sum + Math.abs(m.amount), 0);
 
     this.totalSavings = this.totalIncome - this.totalExpense;
 
-    const expenses = monthMovements.filter(m => m.isExpense);
+    const yearMovements = this.movements.filter(m => (m.date ?? '').startsWith(String(year)));
+    const expensesYear = yearMovements.filter(m => m.isExpense);
     const categoryMap = new Map<string, { amount: number; icon: string; iconBg: string }>();
 
-    expenses.forEach(m => {
+    expensesYear.forEach(m => {
       const categoryName = m.category || 'Sin categoría';
-      const current = categoryMap.get(categoryName) ?? { amount: 0, icon: m.icon || 'cash-outline', iconBg: m.iconBg };
+      const current = categoryMap.get(categoryName) ?? { amount: 0, icon: m.icon || 'cash-outline', iconBg: m.iconBg || '#64748b' };
       current.amount += Math.abs(m.amount);
+      if (m.icon) current.icon = m.icon;
+      if (m.iconBg) current.iconBg = m.iconBg;
       categoryMap.set(categoryName, current);
     });
 
+    const totalExpenseYear = expensesYear.reduce((s, m) => s + Math.abs(m.amount), 0);
     this.categoryStats = Array.from(categoryMap.entries())
       .map(([name, value]) => ({
         name,
         amount: value.amount,
-        percentage: this.totalExpense > 0 ? (value.amount / this.totalExpense) * 100 : 0,
+        percentage: totalExpenseYear > 0 ? (value.amount / totalExpenseYear) * 100 : 0,
         color: value.iconBg || '#64748b',
         icon: value.icon || 'cash-outline',
       }))
       .sort((a, b) => b.amount - a.amount);
 
     const monthlyAggregates = new Map<string, { income: number; expense: number }>();
-    this.movements.forEach(m => {
+    yearMovements.forEach(m => {
       const key = (m.date ?? '').slice(0, 7);
       if (!key) return;
-
       const current = monthlyAggregates.get(key) ?? { income: 0, expense: 0 };
       if (m.isExpense) {
         current.expense += Math.abs(m.amount);
@@ -116,51 +125,29 @@ export class Tab4Page implements OnInit, OnDestroy, ViewWillEnter {
       monthlyAggregates.set(key, current);
     });
 
-    const monthlyStats = Array.from(monthlyAggregates.entries())
-      .sort((a, b) => b[0].localeCompare(a[0]))
-      .map(([key, totals]) => {
-        const maxValue = Math.max(totals.income, totals.expense, 1);
-        const incomeHeight = Math.min(90, Math.round((totals.income / maxValue) * 90));
-        const expenseHeight = Math.min(90, Math.round((totals.expense / maxValue) * 90));
-
-        return {
-          monthName: this.getMonthName(Number(key.slice(5, 7))),
-          income: totals.income,
-          expense: totals.expense,
-          maxHeightIncome: Math.max(15, incomeHeight),
-          maxHeightExpense: Math.max(15, expenseHeight)
-        };
-      });
-
-    this.monthlyStats = monthlyStats;
-
-    let cumulativeSavings = 0;
-    let savingsPath = '';
-    this.monthlyStats.forEach((stat, index) => {
-      const savings = stat.income - stat.expense;
-      cumulativeSavings += savings;
-      const x = 15 + index * 68;
-      const y = Math.max(15, Math.min(85, 80 - (cumulativeSavings / 50)));
-      savingsPath = index === 0 ? `M ${x} ${y}` : `${savingsPath} L ${x} ${y}`;
+    const monthNames = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    this.monthlyStats = Array.from({ length: 12 }, (_, i) => {
+      const key = `${year}-${String(i + 1).padStart(2, '0')}`;
+      const totals = monthlyAggregates.get(key) ?? { income: 0, expense: 0 };
+      const maxValue = Math.max(totals.income, totals.expense, 1);
+      const incomeHeight = Math.min(90, Math.round((totals.income / maxValue) * 90));
+      const expenseHeight = Math.min(90, Math.round((totals.expense / maxValue) * 90));
+      return {
+        monthName: monthNames[i],
+        income: totals.income,
+        expense: totals.expense,
+        maxHeightIncome: Math.max(totals.income > 0 ? 6 : 2, incomeHeight),
+        maxHeightExpense: Math.max(totals.expense > 0 ? 6 : 2, expenseHeight),
+      };
     });
-
-    this.savingsPoints = savingsPath;
   }
 
-  getMonthName(month: number): string {
-    const months = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-    return months[(month - 1) % 12] ?? '';
-  }
-
-  // Método idéntico al de Tab1 para abrir el modal estilizado con el selector Ingreso/Gasto
   async openAddMovement() {
     const modal = await this.modalController.create({
       component: AddMovementModalComponent,
       componentProps: { initialType: 'gasto' }
     });
-
     await modal.present();
-
     const { data, role } = await modal.onDidDismiss();
     if (role === 'created' && data) {
       await this.transactionService.addMovement(data);

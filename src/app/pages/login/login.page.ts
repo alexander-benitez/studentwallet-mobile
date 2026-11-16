@@ -147,17 +147,12 @@ export class LoginPage {
 
       const data = await response.json().catch(() => ({}));
       const message =
-        data.message || 'Si el correo existe, se ha enviado un código de recuperación.';
+        data.message || 'Código de recuperación enviado. Revisa tu correo.';
 
       if (response.ok) {
-        const navigated = await this.ngZone.run(() =>
+        await this.ngZone.run(() =>
           this.router.navigate(['/reset-password'], { queryParams: { email } })
         );
-        if (!navigated) {
-          await this.ngZone.run(() =>
-            this.router.navigateByUrl(`/reset-password?email=${encodeURIComponent(email)}`)
-          );
-        }
         void this.showToast(message, 'success');
       } else {
         await this.showToast(data.message || 'No se pudo procesar la solicitud.', 'danger');
@@ -173,9 +168,10 @@ export class LoginPage {
   private async showToast(message: string, color: 'success' | 'danger') {
     const toast = await this.toastController.create({
       message,
-      duration: 3000,
+      duration: 3500,
       color,
-      position: 'bottom'
+      position: 'top',
+      cssClass: 'toast-notice'
     });
     await toast.present();
   }

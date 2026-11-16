@@ -7,6 +7,7 @@ export interface Movement {
   category: string;
   categoryId?: number;
   subtitle: string;
+  concepto?: string;
   amount: number;
   isExpense: boolean;
   icon: string;
@@ -91,6 +92,7 @@ export class TransactionService {
           const isExpense = item.type === 'gasto' || item.type === 'expense' || Number(item.amount) < 0;
           const absAmount = Math.abs(Number(item.amount));
           const categoryName = item.category?.name || item.category || 'General';
+          const date = (item.date || item.transaction_date || item.created_at || '').toString().slice(0, 10);
 
           return {
             id: item.id,
@@ -100,8 +102,9 @@ export class TransactionService {
             amount: isExpense ? -absAmount : absAmount,
             isExpense: isExpense,
             icon: isExpense ? 'cash-outline' : 'cash-outline',
-            iconBg: isExpense ? '#2a2216' : '#133023',
-            period: 'week'
+            iconBg: item.category?.color || (isExpense ? '#ef4444' : '#10b981'),
+            period: 'week',
+            date
           };
         });
 
@@ -121,8 +124,9 @@ export class TransactionService {
       });
 
       if (res.ok) {
-        const json = await res.json();
-        return json.data || [];
+        const json = await res.json().catch(() => ({}));
+        const data = Array.isArray(json) ? json : (json.data ?? []);
+        return Array.isArray(data) ? data : [];
       }
 
       const errorBody = await res.text();
@@ -142,11 +146,11 @@ export class TransactionService {
       }
 
       const body = {
-        amount: Number(item.amount),
+        amount: Math.abs(Number(item.amount)),
         type: item.isExpense ? 'gasto' : 'ingreso',
         category_id: categoryId,
-        description: item.subtitle || item.category,
-        date: new Date().toISOString().split('T')[0]
+        description: item.concepto?.trim() || item.subtitle || item.category,
+        date: item.date || new Date().toISOString().split('T')[0]
       };
 
       const res = await fetch(`${environment.apiUrl}/transactions`, {

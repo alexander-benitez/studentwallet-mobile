@@ -91,6 +91,12 @@ export class Tab5Page implements OnInit {
         headers: this.getHeaders()
       });
 
+      if (res.status === 401) {
+        try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch { /* */ }
+        this.router.navigate(['/login'], { replaceUrl: true });
+        return;
+      }
+
       if (res.ok) {
         const json = await res.json();
         const user = json.data;
@@ -116,6 +122,12 @@ export class Tab5Page implements OnInit {
         headers: this.getHeaders(),
         body: JSON.stringify(this.profile)
       });
+
+      if (res.status === 401) {
+        try { localStorage.removeItem('auth_token'); localStorage.removeItem('user_data'); } catch { /* */ }
+        this.router.navigate(['/login'], { replaceUrl: true });
+        return;
+      }
 
       if (res.ok) {
         alert('Perfil actualizado correctamente');

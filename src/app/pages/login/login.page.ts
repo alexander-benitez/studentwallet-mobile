@@ -171,8 +171,17 @@ export class LoginPage {
 
     const values = (result.data && (result.data.values ?? result.data)) || {};
     const email = (values.email || '').toString().trim();
+    this.errorMessage = '';
+
     if (!email) {
-      await this.showToast('Debes ingresar un correo.', 'danger');
+      this.errorMessage = 'Debes ingresar tu correo electrónico para recuperar tu contraseña.';
+      this.cdr.detectChanges();
+      return;
+    }
+
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+      this.errorMessage = 'El correo de recuperación debe terminar en @gmail.com.';
+      this.cdr.detectChanges();
       return;
     }
 
@@ -181,6 +190,8 @@ export class LoginPage {
 
   async submitForgotPassword(email: string) {
     this.isLoading = true;
+    this.errorMessage = '';
+    this.cdr.detectChanges();
     try {
       const response = await fetch(`${environment.apiUrl}/forgot-password`, {
         method: 'POST',
@@ -192,22 +203,20 @@ export class LoginPage {
       });
 
       const data = await response.json().catch(() => ({}));
-      const message =
-        data.message || 'Código de recuperación enviado. Revisa tu correo.';
 
       if (response.ok) {
         await this.ngZone.run(() =>
           this.router.navigate(['/reset-password'], { queryParams: { email } })
         );
-        void this.showToast(message, 'success');
       } else {
-        await this.showToast(data.message || 'No se pudo procesar la solicitud.', 'danger');
+        this.errorMessage = data.message || 'No se pudo procesar la solicitud de recuperación.';
       }
     } catch (error) {
       console.error('Error al solicitar recuperación:', error);
-      await this.showToast('No se pudo conectar con el servidor.', 'danger');
+      this.errorMessage = 'No se pudo conectar con el servidor. Intenta de nuevo.';
     } finally {
       this.isLoading = false;
+      this.cdr.detectChanges();
     }
   }
 

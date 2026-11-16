@@ -142,11 +142,22 @@ export class ConfiguracionPage implements OnInit, ViewWillEnter {
 
       const json = await res.json();
       const data = json.data ?? json;
-      await this.generateBackupPdf(data);
-      alert('Respaldo PDF generado correctamente');
+      const fileName = await this.generateBackupPdf(data);
+      await this.notifyPdfCreated(fileName);
+      await this.showStyledAlert(
+        'Respaldo PDF generado',
+        Capacitor.isNativePlatform()
+          ? `Se guardó en Descargas:\n${fileName}`
+          : 'Tu respaldo en PDF se descargó correctamente.',
+        'success'
+      );
     } catch (err) {
       console.error('Error al generar el respaldo:', err);
-      alert('No se pudo generar el respaldo en PDF');
+      await this.showStyledAlert(
+        'Error al exportar',
+        'No se pudo generar el respaldo en PDF. Intenta de nuevo.',
+        'danger'
+      );
     }
   }
 

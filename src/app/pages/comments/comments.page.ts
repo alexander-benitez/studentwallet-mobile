@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, OnDestroy, OnInit, inject } from '@angula
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import {
+  AlertController,
   IonContent,
   IonHeader,
   IonToolbar,
@@ -71,6 +72,7 @@ export class CommentsPage implements OnInit, OnDestroy, ViewWillEnter {
   toastColor = 'success';
 
   private api = inject(ApiService);
+  private alertController = inject(AlertController);
   private cdr = inject(ChangeDetectorRef);
   private destroyed = false;
 
@@ -187,10 +189,15 @@ export class CommentsPage implements OnInit, OnDestroy, ViewWillEnter {
     });
   }
 
-  private showToast(message: string, color: string) {
-    this.toastMessage = message;
-    this.toastColor = color;
-    this.toastOpen = true;
+  private async showToast(message: string, color: string) {
+    const isSuccess = color === 'success';
+    const alert = await this.alertController.create({
+      header: isSuccess ? '¡Listo!' : 'Atención',
+      message,
+      cssClass: ['sw-alert', isSuccess ? 'sw-alert-success' : 'sw-alert-danger'],
+      buttons: [{ text: 'OK', role: 'confirm' }],
+    });
+    await alert.present();
   }
 
   private refreshView(): void {

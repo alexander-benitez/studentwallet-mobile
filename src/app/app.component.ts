@@ -3,7 +3,7 @@ import { Component, NgZone } from '@angular/core';
 import { Router } from '@angular/router';
 import { App } from '@capacitor/app';
 import { Preferences } from '@capacitor/preferences';
-import { IonApp, IonRouterOutlet, NavController, Platform } from '@ionic/angular';
+import { AlertController, IonApp, IonRouterOutlet, ModalController, NavController, Platform } from '@ionic/angular';
 
 @Component({
   selector: 'app-root',
@@ -17,6 +17,8 @@ export class AppComponent {
     private navController: NavController,
     private ngZone: NgZone,
     private location: Location,
+    private modalController: ModalController,
+    private alertController: AlertController,
   ) {
     this.initializeApp();
   }
@@ -32,12 +34,31 @@ export class AppComponent {
       this.navController.navigateRoot('/tabs/tab1', { animated: false });
     }
 
-    App.addListener('backButton', () => {
+    App.addListener('backButton', async () => {
+      const topAlert = await this.alertController.getTop();
+      if (topAlert) {
+        await topAlert.dismiss();
+        return;
+      }
+
+      const topModal = await this.modalController.getTop();
+      if (topModal) {
+        await topModal.dismiss();
+        return;
+      }
+
       this.ngZone.run(() => {
-        const url = this.router.url;
-        if (url === '/welcome' || url === '/login' || url === '/register') {
+        const cleanUrl = this.router.url.split('?')[0].split('#')[0];
+
+        if (cleanUrl === '/reset-password') {
+          this.navController.navigateBack('/login');
+        } else if (cleanUrl === '/login' || cleanUrl === '/register') {
+          this.navController.navigateBack('/welcome');
+        } else if (cleanUrl === '/welcome' || cleanUrl === '/' || cleanUrl === '') {
           App.minimizeApp();
-        } else if (url.startsWith('/tabs')) {
+        } else if (cleanUrl === '/tabs/tab1' || cleanUrl === '/tabs') {
+          App.minimizeApp();
+        } else if (cleanUrl.startsWith('/tabs/') || cleanUrl === '/tab4') {
           this.navController.navigateRoot('/tabs/tab1');
         } else {
           this.location.back();

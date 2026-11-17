@@ -57,6 +57,7 @@ export class Tab5Page implements OnInit, ViewWillEnter {
     carrera: ''
   };
 
+  email: string = '';
   rol: string = 'Estudiante';
   saving: boolean = false;
 
@@ -90,6 +91,7 @@ export class Tab5Page implements OnInit, ViewWillEnter {
           universidad: u.universidad || this.profile.universidad || '',
           carrera: u.carrera || this.profile.carrera || ''
         };
+        if (u.email) this.email = u.email;
         if (u.rol) this.rol = u.rol;
         this.cdr.detectChanges();
       }
@@ -137,6 +139,7 @@ export class Tab5Page implements OnInit, ViewWillEnter {
           universidad: user?.universidad || '',
           carrera: user?.carrera || ''
         };
+        this.email = user?.email || this.email || '';
         this.rol = user?.rol || 'Estudiante';
         try {
           localStorage.setItem('user_info', JSON.stringify(user));
